@@ -9,28 +9,41 @@
 /* ── RESET & TOKENS ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:linear-gradient(135deg,#89f7fe 0%,#66a6ff 100%);
-  --card:rgba(255,255,255,.15);
-  --card-border:rgba(255,255,255,.3);
-  --text:#fff;
-  --num-color:#003366;
-  --btn-bg:#ffeb3b;
-  --btn-txt:#333;
-  --input-bg:rgba(255,255,255,.85);
-  --accent:#ffeb3b;
+  --bg:linear-gradient(145deg,#fdf6ec 0%,#e8ddd0 50%,#d6c9b8 100%);
+  --card:rgba(255,252,248,.82);
+  --card-border:rgba(180,160,130,.3);
+  --text:#1c1917;
+  --text-muted:#78655a;
+  --num-color:#92400e;
+  --btn-bg:#f59e0b;
+  --btn-txt:#1c1917;
+  --input-bg:#fffcf8;
+  --input-text:#1c1917;
+  --input-border:rgba(180,160,130,.5);
+  --accent:#f59e0b;
+  --accent-glow:rgba(245,158,11,.25);
   --radius:18px;
-  --shadow:0 4px 20px rgba(0,0,0,.15);
+  --shadow:0 4px 24px rgba(100,70,30,.12);
+  --topbar-bg:rgba(253,246,236,.92);
+  --widget-bg:rgba(255,252,248,.88);
 }
 body.dark{
-  --bg:linear-gradient(135deg,#0f0f1a 0%,#16213e 100%);
-  --card:rgba(0,0,0,.45);
-  --card-border:rgba(255,255,255,.1);
-  --text:#e8e8e8;
-  --num-color:#5cc8ff;
-  --btn-bg:#5cc8ff;
-  --btn-txt:#000;
-  --input-bg:rgba(30,30,45,.9);
-  --accent:#5cc8ff;
+  --bg:linear-gradient(145deg,#0d1117 0%,#161b22 50%,#1a2030 100%);
+  --card:rgba(22,27,34,.9);
+  --card-border:rgba(255,255,255,.09);
+  --text:#e6edf3;
+  --text-muted:#8b949e;
+  --num-color:#f0b429;
+  --btn-bg:#f59e0b;
+  --btn-txt:#0d1117;
+  --input-bg:#21262d;
+  --input-text:#e6edf3;
+  --input-border:rgba(255,255,255,.14);
+  --accent:#f59e0b;
+  --accent-glow:rgba(245,158,11,.2);
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --topbar-bg:rgba(13,17,23,.95);
+  --widget-bg:rgba(22,27,34,.95);
 }
 
 /* ── BODY ───────────────────────────────────────────────────────── */
@@ -107,7 +120,7 @@ body{
 }
 #confirm-modal.on{display:flex}
 .confirm-box{
-  background:var(--card);border:1px solid var(--card-border);
+  background:var(--widget-bg);border:1px solid var(--card-border);
   border-radius:22px;padding:32px 28px;max-width:340px;width:90%;
   text-align:center;backdrop-filter:blur(18px);
   box-shadow:0 12px 44px rgba(0,0,0,.45);
@@ -141,23 +154,23 @@ body{
 /* ── TOP BAR ────────────────────────────────────────────────────── */
 #topbar{
   position:fixed;top:0;left:0;right:0;height:62px;
-  background:var(--card);backdrop-filter:blur(16px);
+  background:var(--topbar-bg);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--card-border);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 18px;z-index:200;gap:12px;
-  box-shadow:0 2px 12px rgba(0,0,0,.12);
+  box-shadow:0 2px 16px rgba(0,0,0,.1);
 }
 #currency-ticker{
   display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;font-weight:500;flex:1;
 }
-.cur-item span{color:var(--num-color);margin-left:4px;font-weight:700}
+.cur-item{color:var(--text)}.cur-item span{color:var(--num-color);margin-left:4px;font-weight:700}
 .icon-btn{
-  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+  background:rgba(128,100,60,.12);border:1px solid var(--card-border);
   color:var(--text);font-size:1.3rem;width:40px;height:40px;border-radius:50%;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:.25s;flex-shrink:0;
 }
-.icon-btn:hover{background:rgba(255,255,255,.36);transform:scale(1.08)}
+.icon-btn:hover{background:rgba(128,100,60,.22);transform:scale(1.08)}
 
 /* ── LIGHTBOX ───────────────────────────────────────────────────── */
 #lightbox{
@@ -204,12 +217,12 @@ body{
 
 /* ── WIDGET ─────────────────────────────────────────────────────── */
 .widget{
-  background:var(--card);backdrop-filter:blur(14px);
+  background:var(--widget-bg);backdrop-filter:blur(14px);
   border:1px solid var(--card-border);border-radius:var(--radius);
   padding:16px;box-shadow:var(--shadow);
 }
 .widget-title{
-  font-weight:700;font-size:.95rem;margin-bottom:12px;
+  font-weight:700;font-size:.95rem;margin-bottom:12px;color:var(--text);
   padding-bottom:8px;border-bottom:1px solid var(--card-border);
   display:flex;align-items:center;gap:6px;
 }
@@ -224,7 +237,7 @@ body{
   aspect-ratio:1;display:flex;align-items:center;justify-content:center;
   border-radius:50%;cursor:pointer;font-size:.8rem;position:relative;transition:.15s;
 }
-.cal-day:hover{background:rgba(255,255,255,.22)}
+.cal-day:hover{background:rgba(245,158,11,.15)}
 .cal-day.today{border:2px solid var(--accent);font-weight:700}
 .cal-day.has-event::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;background:var(--accent);border-radius:50%}
 .cal-day.faded{opacity:.25;pointer-events:none}
@@ -232,12 +245,36 @@ body{
 /* ── FILM WIDGET ────────────────────────────────────────────────── */
 .film-inputs{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .film-inp{
-  padding:7px 10px;border-radius:10px;border:none;
-  background:var(--input-bg);font-size:.78rem;color:#222;width:100%;outline:none;
+  padding:7px 10px;border-radius:10px;border:1px solid var(--input-border);
+  background:var(--input-bg);font-size:.78rem;color:var(--input-text);width:100%;outline:none;
+  transition:border-color .2s;
 }
+.film-inp:focus{border-color:var(--accent);}
 .film-inp-row{display:flex;gap:6px}
+/* ── STAR PICKER ─────────────────────────────────────────────────── */
+.star-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--input-bg);border:1px solid var(--input-border);
+  border-radius:12px;padding:8px 12px;transition:border-color .2s;
+}
+.star-row:focus-within{border-color:var(--accent)}
+.star-row label{font-size:.75rem;color:var(--text-muted);white-space:nowrap;flex-shrink:0}
+.star-picker{display:flex;gap:1px;align-items:center}
+.star-picker button{
+  background:none;border:none;cursor:pointer;
+  font-size:1.55rem;line-height:1;padding:1px 3px;
+  color:rgba(180,160,100,.3);transition:color .1s,transform .12s;
+  position:relative;
+}
+body.dark .star-picker button{color:rgba(255,255,255,.15)}
+.star-picker button:hover,.star-picker button.on{color:#f59e0b;transform:scale(1.15)}
+.star-val{
+  font-size:.82rem;font-weight:700;color:var(--accent);
+  min-width:34px;text-align:right;flex-shrink:0;
+}
+
 .film-list-inner{display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:320px;padding-right:2px}
-.film-item{display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.2);padding:8px;border-radius:10px;position:relative}
+.film-item{display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.08);border:1px solid var(--card-border);padding:8px;border-radius:10px;position:relative}
 .film-poster{width:38px;height:56px;object-fit:cover;border-radius:5px;background:#333;flex-shrink:0}
 .film-info{flex:1;overflow:hidden}
 .film-title-txt{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -259,11 +296,11 @@ body{
 }
 .modal-wrap.on{display:flex}
 .modal-box{
-  background:var(--card);border:1px solid var(--card-border);
+  background:var(--widget-bg);border:1px solid var(--card-border);
   padding:26px;border-radius:22px;width:90%;max-width:500px;
   position:relative;max-height:88vh;overflow-y:auto;
   display:flex;flex-direction:column;cursor:default;
-  backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);color:var(--text);
 }
 .modal-close{
   position:absolute;top:10px;right:10px;
@@ -300,7 +337,8 @@ body{
 /* ── MAIN ───────────────────────────────────────────────────────── */
 #main-content h1{
   font-size:clamp(1.5rem,3vw,2rem);margin-bottom:28px;
-  text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.3);
+  text-align:center;color:var(--text);text-shadow:none;
+  letter-spacing:-.5px;
 }
 #cities{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
@@ -308,10 +346,10 @@ body{
 }
 .city-card{
   border-radius:var(--radius);overflow:hidden;
-  background:var(--card);backdrop-filter:blur(12px);
+  background:var(--widget-bg);backdrop-filter:blur(12px);
   border:1px solid var(--card-border);
   display:flex;flex-direction:column;box-shadow:var(--shadow);
-  transition:transform .2s;
+  transition:transform .2s,box-shadow .2s;
 }
 .city-card:hover{transform:translateY(-3px)}
 .city-img-wrap{position:relative;height:170px;background:#1a1a2e}
@@ -320,22 +358,22 @@ body{
   transition:opacity .4s;
 }
 .city-img-wrap img.loading{opacity:0}
-.city-info{padding:18px;text-align:center;flex-grow:1}
+.city-info{padding:18px;text-align:center;flex-grow:1;color:var(--text);}
 .city-info h3{font-size:1rem;margin-bottom:4px}
 .city-time{font-size:1.05rem;font-weight:700;margin-bottom:3px}
 .city-temp{font-size:1.1rem;font-weight:600;margin-bottom:2px}
 .city-cond{font-size:.82rem;opacity:.88}
 .city-actions{margin-top:12px;display:flex;justify-content:center}
 .upload-label-btn{
-  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  background:rgba(128,100,60,.1);border:1px solid var(--card-border);
   color:var(--text);padding:6px 16px;border-radius:20px;
   cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:6px;transition:.2s;
 }
-.upload-label-btn:hover{background:rgba(255,255,255,.32)}
+.upload-label-btn:hover{background:rgba(128,100,60,.2)}
 
 /* ── SECTION ────────────────────────────────────────────────────── */
 .section{
-  background:var(--card);border:1px solid var(--card-border);
+  background:var(--widget-bg);border:1px solid var(--card-border);
   border-radius:var(--radius);padding:20px;
   backdrop-filter:blur(8px);margin-bottom:24px;
   box-shadow:var(--shadow);
@@ -373,25 +411,42 @@ body{
 .gallery-item:hover .del-btn{opacity:1}
 .load-more-btn{
   display:block;margin:14px auto 0;
-  background:rgba(255,255,255,.14);color:var(--text);
+  background:rgba(128,100,60,.08);color:var(--text-muted);
   border:1px solid var(--card-border);padding:8px 26px;
   border-radius:20px;cursor:pointer;font-size:.82rem;transition:.2s;
 }
-.load-more-btn:hover{background:rgba(255,255,255,.28)}
+.load-more-btn:hover{background:rgba(128,100,60,.16);color:var(--text)}
 
 /* ── SHARE INPUT ────────────────────────────────────────────────── */
 .share-inp{
-  padding:8px 12px;border-radius:18px;border:none;
-  background:var(--input-bg);color:#222;outline:none;font-size:.85rem;
+  padding:8px 12px;border-radius:18px;border:1px solid var(--input-border);
+  background:var(--input-bg);color:var(--input-text);outline:none;font-size:.85rem;
+  transition:border-color .2s;
 }
+.share-inp:focus{border-color:var(--accent);}
 
 /* ── EVENT ──────────────────────────────────────────────────────── */
 .ev-item{
-  background:rgba(0,0,0,.12);padding:6px 10px;
-  margin-bottom:6px;border-radius:8px;
-  display:flex;justify-content:space-between;align-items:center;font-size:.85rem;
+  background:var(--input-bg);border:1px solid var(--input-border);
+  padding:10px 14px;margin-bottom:8px;border-radius:12px;
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;font-size:.85rem;color:var(--text);
+  transition:border-color .15s;
 }
-.ev-del{color:#e74c3c;cursor:pointer;font-size:1.1rem;line-height:1;background:none;border:none}
+.ev-item:hover{border-color:var(--accent)}
+.ev-item-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.ev-item-desc{font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-item-badge{
+  flex-shrink:0;padding:2px 8px;border-radius:6px;
+  font-size:.65rem;font-weight:700;color:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.35);text-shadow:0 1px 2px rgba(0,0,0,.5);
+}
+.ev-del{
+  color:rgba(200,0,0,.6);cursor:pointer;font-size:1.1rem;
+  line-height:1;background:none;border:none;flex-shrink:0;
+  transition:color .15s;padding:2px;
+}
+.ev-del:hover{color:#e74c3c}
 
 /* ── RESPONSIVE ─────────────────────────────────────────────────── */
 @media(max-width:1280px){
@@ -412,11 +467,11 @@ body{
   display:none;position:fixed;
   bottom:0;left:0;right:0;
   max-height:80vh;overflow-y:auto;
-  background:var(--card);backdrop-filter:blur(20px);
+  background:var(--widget-bg);backdrop-filter:blur(24px);
   border-top:1px solid var(--card-border);
   border-radius:22px 22px 0 0;
   padding:20px;z-index:800;
-  box-shadow:0 -6px 30px rgba(0,0,0,.3);
+  box-shadow:0 -8px 32px rgba(0,0,0,.25);
   transform:translateY(110%);transition:transform .3s ease;
 }
 .mob-panel.on{display:block;transform:translateY(0)}
@@ -476,12 +531,11 @@ body{
 <div class="modal-wrap" id="ev-modal">
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" id="ev-close">×</button>
-    <h3 id="ev-date-title" style="margin-bottom:14px">Tarih</h3>
+    <h3 id="ev-date-title" style="margin-bottom:16px;font-size:1.1rem">Tarih</h3>
     <div id="ev-list" style="margin-bottom:14px"></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <input type="time" id="ev-time" class="share-inp" style="width:84px">
-      <input type="text" id="ev-desc" class="share-inp" placeholder="Açıklama…" style="flex:1;min-width:120px">
-      <button id="ev-add" class="upload-btn">+</button>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="ev-desc" class="share-inp" placeholder="Etkinlik ekle…" style="flex:1">
+      <button id="ev-add" class="upload-btn" style="border-radius:14px;padding:0 18px">+</button>
     </div>
   </div>
 </div>
@@ -493,9 +547,11 @@ body{
     <h3>🎬 Tüm Filmler</h3>
     <div class="film-inputs" style="margin-top:14px">
       <input type="text"   id="m-film-url"    class="film-inp" placeholder="Letterboxd / IMDb linki…">
-      <div class="film-inp-row">
-        <input type="number" id="m-film-rating" class="film-inp" placeholder="Puan (0-5)" step="0.1" max="5">
-        <button id="m-film-add" class="upload-btn" style="padding:0 14px">+</button>
+      <div class="star-row">
+        <label>Puan:</label>
+        <div class="star-picker" id="stars-m-film"></div>
+        <span class="star-val" id="starval-m-film">—</span>
+        <button id="m-film-add" class="upload-btn" style="padding:0 14px;margin-left:auto">+</button>
       </div>
     </div>
     <div class="film-list-inner" id="film-list-modal" style="margin-top:10px"></div>
@@ -523,9 +579,11 @@ body{
   <p style="font-weight:700;font-size:.95rem;margin-bottom:10px">🎬 Watchlist</p>
   <div class="film-inputs">
     <input type="text"   id="mob-film-url"    class="film-inp" placeholder="Letterboxd / IMDb linki…">
-    <div class="film-inp-row">
-      <input type="number" id="mob-film-rating" class="film-inp" placeholder="Puan (0-5)" step="0.1" max="5">
-      <button id="mob-film-add" class="upload-btn" style="padding:0 14px">+</button>
+    <div class="star-row">
+      <label>Puan:</label>
+      <div class="star-picker" id="stars-mob-film"></div>
+      <span class="star-val" id="starval-mob-film">—</span>
+      <button id="mob-film-add" class="upload-btn" style="padding:0 14px;margin-left:auto">+</button>
     </div>
   </div>
   <div class="film-list-inner" id="film-list-mob" style="margin-top:8px"></div>
@@ -591,9 +649,11 @@ body{
       <div class="widget-title">🎬 Watchlist</div>
       <div class="film-inputs">
         <input type="text"   id="film-url"    class="film-inp" placeholder="Letterboxd / IMDb linki…">
-        <div class="film-inp-row">
-          <input type="number" id="film-rating" class="film-inp" placeholder="Puan (0-5)" step="0.1" max="5">
-          <button id="film-add" class="upload-btn" style="padding:0 14px">+</button>
+        <div class="star-row">
+          <label>Puan:</label>
+          <div class="star-picker" id="stars-film"></div>
+          <span class="star-val" id="starval-film">—</span>
+          <button id="film-add" class="upload-btn" style="padding:0 14px;margin-left:auto">+</button>
         </div>
       </div>
       <div class="film-list-inner" id="film-list-side"></div>
@@ -790,28 +850,83 @@ async function fetchFilmMeta(raw){
   return{title:"Film (link alınamadı)", img:"https://placehold.co/80x120/333/fff?text=🎬"};
 }
 
-async function addFilm(urlIn,ratingIn,btn){
-  const raw=urlIn.value.trim();
-  if(!raw){toast("Link gir!","wrn");return}
-  if(!curUser){toast("Önce giriş yap","wrn");return}
-  const prev=btn.textContent;btn.textContent="⏳";btn.disabled=true;
-  try{
-    const meta=await fetchFilmMeta(raw);
-    await push(ref(db,"films"),{
-      url:raw.startsWith("http")?raw:"https://"+raw,
-      title:meta.title,img:meta.img,
-      rating:ratingIn.value||"?",
-      timestamp:Date.now(),uploader:curUser.name,color:curUser.color
+/* addFilm inlined into star-picker wiring below */
+
+/* ── STAR PICKERS ── */
+const starRatings = new Map(); // pickerId -> selected value (0.5 steps)
+
+function initStarPicker(pickerId, valId){
+  const container = document.getElementById(pickerId);
+  const valEl = document.getElementById(valId);
+  if(!container) return;
+  container.innerHTML = "";
+  // 5 stars × 2 halves = values 0.5, 1, 1.5 … 5
+  for(let s = 1; s <= 5; s++){
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "★";
+    btn.dataset.val = s;
+    btn.addEventListener("mouseenter", () => highlightStars(container, s, valEl));
+    btn.addEventListener("mouseleave", () => {
+      const cur = starRatings.get(pickerId) || 0;
+      highlightStars(container, cur, valEl, true);
     });
-    toast("Film eklendi 🎬","ok");urlIn.value="";ratingIn.value="";
-  }catch(e){toast("Film eklenemedi: "+e.message,"err")}
-  finally{btn.textContent=prev;btn.disabled=false}
+    btn.addEventListener("click", () => {
+      const cur = starRatings.get(pickerId);
+      if(cur === s){ starRatings.set(pickerId, 0); highlightStars(container, 0, valEl, true); }
+      else { starRatings.set(pickerId, s); highlightStars(container, s, valEl, true); }
+    });
+    container.appendChild(btn);
+  }
+  starRatings.set(pickerId, 0);
 }
 
-[["film-add","film-url","film-rating"],
- ["m-film-add","m-film-url","m-film-rating"],
- ["mob-film-add","mob-film-url","mob-film-rating"]].forEach(([b,u,r])=>{
-  document.getElementById(b).addEventListener("click",()=>addFilm(document.getElementById(u),document.getElementById(r),document.getElementById(b)));
+function highlightStars(container, val, valEl, persist=false){
+  Array.from(container.children).forEach((btn,i) => {
+    btn.classList.toggle("on", (i+1) <= val);
+  });
+  if(valEl) valEl.textContent = val > 0 ? val + " ★" : "—";
+}
+
+function getStarRating(pickerId){ return starRatings.get(pickerId) || 0; }
+function resetStarPicker(pickerId, valId){
+  starRatings.set(pickerId, 0);
+  const c = document.getElementById(pickerId), v = document.getElementById(valId);
+  if(c) highlightStars(c, 0, v, true);
+}
+
+// Init all three pickers
+initStarPicker("stars-film",     "starval-film");
+initStarPicker("stars-m-film",   "starval-m-film");
+initStarPicker("stars-mob-film", "starval-mob-film");
+
+// Wire add buttons (no ratingIn needed now)
+[["film-add",    "film-url",     "stars-film",     "starval-film"],
+ ["m-film-add",  "m-film-url",   "stars-m-film",   "starval-m-film"],
+ ["mob-film-add","mob-film-url", "stars-mob-film", "starval-mob-film"]
+].forEach(([btnId, urlId, pickerId, valId])=>{
+  document.getElementById(btnId).addEventListener("click", async ()=>{
+    const urlEl = document.getElementById(urlId);
+    const btn   = document.getElementById(btnId);
+    const raw   = urlEl.value.trim();
+    if(!raw){ toast("Link gir!","wrn"); return; }
+    if(!curUser){ toast("Önce giriş yap","wrn"); return; }
+    const rating = getStarRating(pickerId);
+    const prev = btn.textContent; btn.textContent="⏳"; btn.disabled=true;
+    try{
+      const meta = await fetchFilmMeta(raw);
+      await push(ref(db,"films"),{
+        url: raw.startsWith("http") ? raw : "https://"+raw,
+        title: meta.title, img: meta.img,
+        rating: rating > 0 ? rating : "?",
+        timestamp: Date.now(), uploader: curUser.name, color: curUser.color
+      });
+      toast("Film eklendi 🎬","ok");
+      urlEl.value = "";
+      resetStarPicker(pickerId, valId);
+    }catch(e){ toast("Film eklenemedi: "+e.message,"err"); }
+    finally{ btn.textContent=prev; btn.disabled=false; }
+  });
 });
 
 function mkFilm(f,canDel=false){
@@ -878,20 +993,44 @@ function renderCal(gridId,myId){
 function renderEvList(key){
   const c=document.getElementById("ev-list");c.innerHTML="";
   const evs=evData[key];
-  if(!evs){c.innerHTML='<p style="opacity:.6;font-size:.85rem">Etkinlik yok.</p>';return}
+  if(!evs){c.innerHTML='<p style="opacity:.5;font-size:.85rem;text-align:center;padding:10px 0">Etkinlik yok.</p>';return}
   Object.keys(evs).forEach(k=>{
     const ev=evs[k];
     const div=document.createElement("div");div.className="ev-item";
-    const span=document.createElement("span");span.innerHTML=`<b>${ev.time||"--:--"}</b> ${ev.desc}`;
+
+    // Left side: optional badge + description
+    const left=document.createElement("div");left.className="ev-item-left";
+    if(ev.uploader&&ev.color){
+      const fc=LIGHT.has(ev.uploader)?"#000":"#fff";
+      const ts=LIGHT.has(ev.uploader)?"none":"0 1px 2px rgba(0,0,0,.6)";
+      const badge=document.createElement("span");badge.className="ev-item-badge";
+      badge.style.cssText=`background:${ev.color};color:${fc};text-shadow:${ts}`;
+      badge.textContent=ev.uploader;
+      left.appendChild(badge);
+    }
+    const desc=document.createElement("span");desc.className="ev-item-desc";desc.textContent=ev.desc;
+    left.appendChild(desc);
+
     const del=document.createElement("button");del.className="ev-del";del.textContent="×";
     del.addEventListener("click",async()=>{if(await confirm2("Etkinliği silmek istiyor musun?")){await remove(ref(db,`calendar_events/${key}/${k}`));toast("Etkinlik silindi","inf")}});
-    div.appendChild(span);div.appendChild(del);c.appendChild(div);
+
+    div.appendChild(left);div.appendChild(del);c.appendChild(div);
   });
 }
 
 document.getElementById("ev-add").addEventListener("click",()=>{
-  const t=document.getElementById("ev-time").value,desc=document.getElementById("ev-desc").value.trim();
-  if(desc&&selKey){push(ref(db,`calendar_events/${selKey}`),{time:t,desc});document.getElementById("ev-desc").value="";toast("Etkinlik eklendi 📅","ok")}
+  const desc=document.getElementById("ev-desc").value.trim();
+  if(!desc){return}
+  if(!selKey){return}
+  const payload={desc};
+  if(curUser){payload.uploader=curUser.name;payload.color=curUser.color}
+  push(ref(db,`calendar_events/${selKey}`),payload);
+  document.getElementById("ev-desc").value="";
+  toast("Etkinlik eklendi 📅","ok");
+});
+// Enter key support on ev-desc
+document.getElementById("ev-desc").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){document.getElementById("ev-add").click()}
 });
 document.getElementById("ev-close").addEventListener("click",()=>document.getElementById("ev-modal").classList.remove("on"));
 
