@@ -667,8 +667,7 @@ body.dark .star-picker button{color:rgba(255,255,255,.15)}
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, push, remove, runTransaction, query, limitToLast }
   from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL, deleteObject }
-  from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+
 
 const FB={
   apiKey:"AIzaSyCUTBQ5oIgF1GEU8rGj9Mxqz7a2g1Ecswk",
@@ -681,18 +680,9 @@ const FB={
 };
 const app  = initializeApp(FB);
 const db   = getDatabase(app);
-const store= getStorage(app);
 
-// Helper: decode Firebase Storage errors to human-readable messages
-function storageErrMsg(err){
-  const code = err?.code || "";
-  if(code.includes("unauthorized")) return "İzin hatası: Firebase Storage kurallarını kontrol et.";
-  if(code.includes("canceled"))     return "Yükleme iptal edildi.";
-  if(code.includes("quota"))        return "Depolama kotası doldu.";
-  if(code.includes("unauthenticated")) return "Kimlik doğrulama gerekli.";
-  if(err?.message?.includes("CORS")) return "CORS hatası: Firebase konsolundan Storage kurallarını güncelle.";
-  return err?.message || "Bilinmeyen hata";
-}
+
+function storageErrMsg(err){ return err?.message || "Bilinmeyen hata"; }
 
 /* ── TOAST ── */
 function toast(msg,type="inf",dur=3200){
@@ -1093,11 +1083,8 @@ CITIES.forEach(city=>{
     if(!file) return;
     prog.classList.add("on");
     try{
-      const blob = await resizeBlob(file, 900, .82);
-      const path = `cities/${city.name}_${Date.now()}.jpg`;
-      const snap = await uploadBytes(sRef(store,path), blob, {contentType:"image/jpeg"});
-      const url  = await getDownloadURL(snap.ref);
-      await set(ref(db,`cities/${city.name}/img`), url);
+      const dataUrl = await resizeToDataUrl(file, 800, .72);
+      await set(ref(db,`cities/${city.name}/img`), dataUrl);
       toast(`${city.name} güncellendi ✅`,"ok");
     } catch(err){
       console.error("City upload error:", err);
@@ -1136,18 +1123,25 @@ function updateTime(){
 }
 
 /* ── IMAGE RESIZE → BLOB (binary upload, much faster than base64) ── */
-function resizeBlob(file,maxW=900,quality=.82){
+// Resize image and return base64 dataURL (stored directly in Realtime DB)
+function resizeToDataUrl(file, maxW=900, quality=.75){
   return new Promise((res,rej)=>{
     const fr=new FileReader();
     fr.onload=ev=>{
       const img=new Image();
       img.onload=()=>{
-        const c=document.createElement("canvas");
-        let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*(maxW/w));w=maxW}
-        c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
-        c.toBlob(blob=>blob?res(blob):rej(new Error("toBlob failed")),"image/jpeg",quality);
-      };img.onerror=rej;img.src=ev.target.result;
-    };fr.onerror=rej;fr.readAsDataURL(file);
+        const cv=document.createElement("canvas");
+        let w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*(maxW/w));w=maxW}
+        cv.width=w;cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        res(cv.toDataURL("image/jpeg",quality));
+      };
+      img.onerror=rej;
+      img.src=ev.target.result;
+    };
+    fr.onerror=rej;
+    fr.readAsDataURL(file);
   });
 }
 
@@ -1175,7 +1169,6 @@ function setupGallery(inputId,dbPath,galleryId,moreId,emoji){
       del.addEventListener("click",async e=>{
         e.stopPropagation();
         if(!await confirm2("Bu fotoğrafı silmek istiyor musun?")) return;
-        if(item.storagePath){try{await deleteObject(sRef(store,item.storagePath))}catch{}}
         await remove(ref(db,`${dbPath}/${item.id}`));toast("Fotoğraf silindi","inf");
       });
       wrap.appendChild(img);wrap.appendChild(react);wrap.appendChild(del);el.appendChild(wrap);
@@ -1201,12 +1194,9 @@ function setupGallery(inputId,dbPath,galleryId,moreId,emoji){
       if(label){ label.style.opacity=".55"; label.style.pointerEvents="none"; }
       toast("Yükleniyor…","inf",10000);
       try{
-        const blob = await resizeBlob(file, 900, .82);
-        const path = `${dbPath}/${Date.now()}_${curUser.name}.jpg`;
-        const snap = await uploadBytes(sRef(store,path), blob, {contentType:"image/jpeg"});
-        const url  = await getDownloadURL(snap.ref);
+        const dataUrl = await resizeToDataUrl(file);
         await push(ref(db,dbPath),{
-          url, storagePath:path, reactions:0,
+          url: dataUrl, reactions:0,
           uploader:curUser.name, color:curUser.color
         });
         toast("Fotoğraf yüklendi 📸","ok");
