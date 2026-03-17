@@ -664,11 +664,11 @@ body.dark .star-picker button{color:rgba(255,255,255,.15)}
 </div><!-- /app-layout -->
 
 <script type="module">
-import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, push, remove, runTransaction, query, limitToLast }
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL, deleteObject }
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+  from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
 
 const FB={
   apiKey:"AIzaSyCUTBQ5oIgF1GEU8rGj9Mxqz7a2g1Ecswk",
@@ -682,6 +682,17 @@ const FB={
 const app  = initializeApp(FB);
 const db   = getDatabase(app);
 const store= getStorage(app);
+
+// Helper: decode Firebase Storage errors to human-readable messages
+function storageErrMsg(err){
+  const code = err?.code || "";
+  if(code.includes("unauthorized")) return "İzin hatası: Firebase Storage kurallarını kontrol et.";
+  if(code.includes("canceled"))     return "Yükleme iptal edildi.";
+  if(code.includes("quota"))        return "Depolama kotası doldu.";
+  if(code.includes("unauthenticated")) return "Kimlik doğrulama gerekli.";
+  if(err?.message?.includes("CORS")) return "CORS hatası: Firebase konsolundan Storage kurallarını güncelle.";
+  return err?.message || "Bilinmeyen hata";
+}
 
 /* ── TOAST ── */
 function toast(msg,type="inf",dur=3200){
@@ -1077,18 +1088,24 @@ CITIES.forEach(city=>{
   lbl.appendChild(fileIn);actions.appendChild(lbl);info.appendChild(actions);
   card.appendChild(wrap);card.appendChild(info);citiesEl.appendChild(card);city.card=card;
 
-  fileIn.addEventListener("change",async e=>{
-    if(!e.target.files[0]) return;
+  fileIn.addEventListener("change", async()=>{
+    const file = fileIn.files[0];
+    if(!file) return;
     prog.classList.add("on");
     try{
-      const blob=await resizeBlob(e.target.files[0],900,.82);
-      const path=`cities/${city.name}_${Date.now()}.jpg`;
-      const snap=await uploadBytes(sRef(store,path),blob,{contentType:"image/jpeg"});
-      const url=await getDownloadURL(snap.ref);
-      await set(ref(db,`cities/${city.name}/img`),url);
+      const blob = await resizeBlob(file, 900, .82);
+      const path = `cities/${city.name}_${Date.now()}.jpg`;
+      const snap = await uploadBytes(sRef(store,path), blob, {contentType:"image/jpeg"});
+      const url  = await getDownloadURL(snap.ref);
+      await set(ref(db,`cities/${city.name}/img`), url);
       toast(`${city.name} güncellendi ✅`,"ok");
-    }catch(err){toast("Yükleme başarısız: "+err.message,"err")}
-    finally{prog.classList.remove("on");e.target.value=""}
+    } catch(err){
+      console.error("City upload error:", err);
+      toast("Yükleme başarısız: "+storageErrMsg(err),"err");
+    } finally {
+      prog.classList.remove("on");
+      fileIn.value = "";
+    }
   });
 
   // Read DB; only swap image when a value actually exists (prevents flash)
@@ -1173,20 +1190,37 @@ function setupGallery(inputId,dbPath,galleryId,moreId,emoji){
   });
   moreBtn.addEventListener("click",()=>{visible+=PAGE;render()});
 
-  inputEl.addEventListener("change",async e=>{
-    if(!e.target.files[0]){return}
-    if(!curUser){toast("Önce giriş yap","wrn");return}
-    const label=inputEl.closest("label");if(label) label.style.opacity=".5";
-    try{
-      const blob=await resizeBlob(e.target.files[0],900,.82);
-      const path=`${dbPath}/${Date.now()}_${curUser.name}.jpg`;
-      const snap=await uploadBytes(sRef(store,path),blob,{contentType:"image/jpeg"});
-      const url=await getDownloadURL(snap.ref);
-      await push(ref(db,dbPath),{url,storagePath:path,reactions:0,uploader:curUser.name,color:curUser.color});
-      toast("Fotoğraf yüklendi 📸","ok");
-    }catch(err){toast("Yükleme başarısız: "+err.message,"err")}
-    finally{if(label) label.style.opacity="1";e.target.value=""}
-  });
+  // Use a cloned-input trick so the same file can be re-selected
+  function wireInput(inp){
+    inp.addEventListener("change", async()=>{
+      const file = inp.files[0];
+      if(!file) return;
+      if(!curUser){ toast("Önce giriş yap","wrn"); return; }
+      const label = inp.closest("label");
+      const origTxt = label ? label.childNodes[0].textContent.trim() : "";
+      if(label){ label.style.opacity=".55"; label.style.pointerEvents="none"; }
+      toast("Yükleniyor…","inf",10000);
+      try{
+        const blob = await resizeBlob(file, 900, .82);
+        const path = `${dbPath}/${Date.now()}_${curUser.name}.jpg`;
+        const snap = await uploadBytes(sRef(store,path), blob, {contentType:"image/jpeg"});
+        const url  = await getDownloadURL(snap.ref);
+        await push(ref(db,dbPath),{
+          url, storagePath:path, reactions:0,
+          uploader:curUser.name, color:curUser.color
+        });
+        toast("Fotoğraf yüklendi 📸","ok");
+      } catch(err){
+        console.error("Upload error:", err);
+        toast("Yükleme başarısız: "+storageErrMsg(err),"err");
+      } finally {
+        if(label){ label.style.opacity="1"; label.style.pointerEvents=""; }
+        // Reset so the same file can be selected again
+        inp.value = "";
+      }
+    });
+  }
+  wireInput(inputEl);
 }
 
 setupGallery("food-in","foods","food-gallery","food-more","😋");
