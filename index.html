@@ -95,6 +95,7 @@ body{
 #topbar{position:fixed;top:0;left:0;right:0;height:62px;background:var(--topbar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:200;gap:12px;box-shadow:0 2px 16px rgba(0,0,0,.1)}
 #currency-ticker{display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;font-weight:500;flex:1}
 .cur-item{color:var(--text)}.cur-item span{color:var(--num-color);margin-left:4px;font-weight:700}
+.cur-loading{opacity:.5;font-style:italic}
 .icon-btn{background:rgba(128,100,60,.12);border:1px solid var(--card-border);color:var(--text);font-size:1.3rem;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
 .icon-btn:hover{background:rgba(128,100,60,.22);transform:scale(1.08)}
 /* LIGHTBOX */
@@ -125,6 +126,12 @@ body{
 .cal-day.today{border:2px solid var(--accent);font-weight:700}
 .cal-day.has-event::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;background:var(--accent);border-radius:50%}
 .cal-day.faded{opacity:.25;pointer-events:none}
+/* TODAY EVENTS PREVIEW */
+#today-events-preview{margin-bottom:12px;display:none}
+#today-events-preview .tev-title{font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.tev-item{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-left:3px solid var(--accent);border-radius:8px;padding:5px 9px;font-size:.76rem;color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.tev-badge{flex-shrink:0;padding:1px 6px;border-radius:5px;font-size:.65rem;font-weight:700;color:#fff}
+.tev-desc{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* FILM WIDGET */
 .film-inputs{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .film-inp{padding:7px 10px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);font-size:.78rem;color:var(--input-text);width:100%;outline:none;transition:border-color .2s}
@@ -157,7 +164,7 @@ body.dark .star-picker button{color:rgba(255,255,255,.15)}
 .react-btn:hover{background:rgba(0,0,0,.8);transform:scale(1.06)}
 .react-btn:active{transform:scale(.94)}
 .react-btn.liked{background:var(--accent);color:#222;font-weight:700;box-shadow:0 0 8px var(--accent)}
-/* FAB — FIX 4: smaller on tiny screens */
+/* FAB */
 .fab-wrap{position:fixed;bottom:18px;right:18px;display:none;flex-direction:column;gap:10px;align-items:flex-end;z-index:300}
 .fab{background:var(--btn-bg);color:var(--btn-txt);padding:10px 16px;border-radius:28px;font-weight:700;font-size:.82rem;border:none;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
 .fab:hover{transform:scale(1.05)}
@@ -178,7 +185,7 @@ body.dark .star-picker button{color:rgba(255,255,255,.15)}
 .city-actions{margin-top:12px;display:flex;justify-content:center}
 .upload-label-btn{background:rgba(128,100,60,.1);border:1px solid var(--card-border);color:var(--text);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:6px;transition:.2s}
 .upload-label-btn:hover{background:rgba(128,100,60,.2)}
-/* SECTION — FIX 1: border-bottom was split across lines */
+/* SECTION */
 .section{background:var(--widget-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:20px;backdrop-filter:blur(8px);margin-bottom:24px;box-shadow:var(--shadow)}
 .section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--card-border);flex-wrap:wrap;gap:10px}
 .section-hdr h2{font-size:1.1rem}
@@ -209,7 +216,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
 .lb-emoji{font-size:1.5rem;flex-shrink:0;width:36px;text-align:center}
 .lb-info{flex:1;min-width:0}
 .lb-cat{font-size:.7rem;color:var(--text-muted);font-weight:500}
-/* FIX 2: lb-name now only shows badge, no duplicate plain text */
 .lb-name{font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:6px}
 .lb-count{font-size:.72rem;font-weight:700;color:var(--btn-txt);background:var(--btn-bg);padding:3px 10px;border-radius:20px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .lb-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
@@ -233,6 +239,13 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
 .wheel-result .wr-link{display:inline-block;margin-top:8px;padding:6px 18px;background:var(--btn-bg);color:var(--btn-txt);border-radius:16px;text-decoration:none;font-weight:600;font-size:.82rem;transition:transform .15s}
 .wheel-result .wr-link:hover{transform:scale(1.05)}
 .wheel-no-film{text-align:center;padding:30px;opacity:.6;font-size:.9rem}
+/* WORLD CUP WIDGET IN LEFT PANEL */
+.wc-widget-link{text-decoration:none;display:block}
+.wc-widget{background:linear-gradient(135deg,rgba(13,27,62,.9),rgba(18,36,79,.85));border:1px solid rgba(240,180,41,.35);cursor:pointer;transition:.2s;text-align:center;padding:18px 16px;border-radius:var(--radius);box-shadow:var(--shadow)}
+.wc-widget:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.wc-widget .wc-icon{font-size:2rem;margin-bottom:6px}
+.wc-widget .wc-title{font-family:'Poppins',sans-serif;font-weight:800;font-size:1rem;color:#f0b429;letter-spacing:1px}
+.wc-widget .wc-sub{font-size:.75rem;color:rgba(240,180,41,.6);margin-top:4px}
 /* RESPONSIVE */
 @media(max-width:1280px){#app-layout{grid-template-columns:1fr}#left-panel,#right-panel{display:none}.fab-wrap{display:flex}body{padding-top:80px}}
 @media(max-width:600px){#user-grid{grid-template-columns:repeat(2,1fr)}#currency-ticker{font-size:.72rem;gap:8px}#cities{grid-template-columns:1fr 1fr}.gallery-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.wheel-outer,.wheel-canvas{width:230px;height:230px}}
@@ -266,9 +279,9 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
 </div>
 <div id="topbar">
   <div id="currency-ticker">
-    <div class="cur-item" id="eur-usd">€ = <span>…</span> USD</div>
-    <div class="cur-item" id="eur-try">€ = <span>…</span> TL</div>
-    <div class="cur-item" id="gram-gold">🥇 <span>…</span> TL</div>
+    <div class="cur-item" id="eur-usd">€ = <span class="cur-loading">…</span> USD</div>
+    <div class="cur-item" id="eur-try">€ = <span class="cur-loading">…</span> TL</div>
+    <div class="cur-item" id="gram-gold">🥇 <span class="cur-loading">…</span> TL</div>
   </div>
   <button class="icon-btn" id="theme-btn">🌙</button>
 </div>
@@ -330,13 +343,7 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
     <div id="lb-list-modal" style="margin-top:14px"></div>
   </div>
 </div>
-<a href="worldcup.html" style="text-decoration:none;display:block">
-      <div class="widget" style="background:linear-gradient(135deg,rgba(13,27,62,.9),rgba(18,36,79,.85));border:1px solid rgba(240,180,41,.35);cursor:pointer;transition:.2s;text-align:center;padding:18px 16px" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        <div style="font-size:2rem;margin-bottom:6px">⚽</div>
-        <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1rem;color:#f0b429;letter-spacing:1px">DÜNYA KUPASI 2026</div>
-        <div style="font-size:.75rem;color:rgba(240,180,41,.6);margin-top:4px">Turnuva Simülatörü →</div>
-      </div>
-    </a>
+
 <div id="mob-backdrop"></div>
 
 <!-- MOBILE CAL PANEL -->
@@ -382,6 +389,13 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   <div id="left-panel">
     <div class="widget">
       <div class="widget-title">📅 Takvim</div>
+
+      <!-- TODAY'S EVENTS PREVIEW — shown above calendar grid -->
+      <div id="today-events-preview">
+        <div class="tev-title">📌 Bugün</div>
+        <div id="today-events-list"></div>
+      </div>
+
       <div class="cal-nav">
         <button class="cal-nav-btn" id="cal-prev">❮</button>
         <span id="cal-my">…</span>
@@ -390,10 +404,20 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
       <div class="cal-days-hdr"><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div></div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
+
     <div class="widget">
       <div class="widget-title">🏆 Liderlik Tablosu</div>
       <div id="lb-list-side"></div>
     </div>
+
+    <!-- WORLD CUP WIDGET — moved here from above app-layout -->
+    <a href="worldcup.html" class="wc-widget-link">
+      <div class="wc-widget">
+        <div class="wc-icon">⚽</div>
+        <div class="wc-title">DÜNYA KUPASI 2026</div>
+        <div class="wc-sub">Turnuva Simülatörü →</div>
+      </div>
+    </a>
   </div>
 
   <div id="main-content">
@@ -549,7 +573,6 @@ document.getElementById("fab-cal").addEventListener("click",()=>openMob("mob-cal
 document.getElementById("fab-film").addEventListener("click",()=>openMob("mob-film-panel"));
 document.getElementById("fab-lb").addEventListener("click",()=>document.getElementById("lb-modal").classList.add("on"));
 document.getElementById("fab-wheel").addEventListener("click",()=>{
-  // On mobile, open modal and init engine there
   document.getElementById("wheel-modal").classList.add("on");
   setTimeout(()=>{
     const modalEngine = makeWheelEngine("wheel-canvas");
@@ -564,7 +587,6 @@ document.getElementById("fab-wheel").addEventListener("click",()=>{
     else{
       noFilm.style.display="none";outer.style.display="block";spinBtn.style.display="inline-flex";
       modalEngine.draw(films);
-      // Replace old listener by cloning button
       const newBtn = spinBtn.cloneNode(true);
       spinBtn.parentNode.replaceChild(newBtn, spinBtn);
       newBtn.addEventListener("click",()=>{
@@ -671,9 +693,37 @@ let calDate=new Date(),selKey=null,evData={};
 onValue(ref(db,"calendar_events"),snap=>{
   evData=snap.val()||{};allEvents=evData;
   renderCal("cal-grid","cal-my");renderCal("cal-grid2","cal-my2");
+  renderTodayEvents();
   if(selKey&&document.getElementById("ev-modal").classList.contains("on")) renderEvList(selKey);
   updateLeaderboard();
 });
+
+/* ── TODAY'S EVENTS PREVIEW ── */
+function getTodayKey(){
+  const now=new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+}
+
+function renderTodayEvents(){
+  const key=getTodayKey();
+  const preview=document.getElementById("today-events-preview");
+  const list=document.getElementById("today-events-list");
+  const dayEvs=evData[key];
+  if(!dayEvs||Object.keys(dayEvs).length===0){preview.style.display="none";return;}
+  list.innerHTML="";
+  Object.values(dayEvs).forEach(ev=>{
+    const item=document.createElement("div");item.className="tev-item";
+    if(ev.uploader&&ev.color){
+      const fc=LIGHT.has(ev.uploader)?"#000":"#fff";
+      const badge=document.createElement("span");badge.className="tev-badge";badge.style.cssText=`background:${ev.color};color:${fc}`;badge.textContent=ev.uploader;
+      item.appendChild(badge);
+    }
+    const desc=document.createElement("span");desc.className="tev-desc";desc.textContent=ev.desc;
+    item.appendChild(desc);
+    list.appendChild(item);
+  });
+  preview.style.display="block";
+}
 
 function renderCal(gridId,myId){
   const y=calDate.getFullYear(),m=calDate.getMonth();
@@ -809,14 +859,73 @@ function setupGallery(inputId,dbPath,galleryId,moreId,emoji){
 setupGallery("food-in","foods","food-gallery","food-more","😋");
 setupGallery("drink-in","drinks","drink-gallery","drink-more","🍹");
 
-async function updateCurrency(){
+/* ══ CURRENCY — fixed with multiple sources + retry + timeout ══ */
+async function fetchWithTimeout(url, ms=5000){
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(), ms);
   try{
-    const r=await fetch("https://api.frankfurter.app/latest?from=EUR&to=USD,TRY");const d=await r.json();
-    const usd=d.rates.USD,tryR=d.rates.TRY,usdTry=tryR/usd;
-    document.querySelector("#eur-usd span").textContent=usd.toFixed(2);
-    document.querySelector("#eur-try span").textContent=tryR.toFixed(2);
-    try{const g=await fetch("https://api.gold-api.com/price/XAU");const gd=await g.json();if(gd.price) document.querySelector("#gram-gold span").textContent=((gd.price/31.1035)*usdTry).toFixed(0)+" TL"}catch{}
-  }catch{toast("Döviz güncellenemedi","wrn")}
+    const r=await fetch(url,{signal:ctrl.signal});
+    clearTimeout(tid);
+    return r;
+  }catch(e){clearTimeout(tid);throw e;}
+}
+
+async function fetchEurRates(){
+  // Try primary source
+  try{
+    const r=await fetchWithTimeout("https://api.frankfurter.app/latest?from=EUR&to=USD,TRY",5000);
+    if(r.ok){const d=await r.json();return{usd:d.rates.USD,tryR:d.rates.TRY};}
+  }catch{}
+  // Fallback: exchangerate-api (free, no key needed for basic)
+  try{
+    const r=await fetchWithTimeout("https://open.er-api.com/v6/latest/EUR",5000);
+    if(r.ok){const d=await r.json();if(d.result==="success") return{usd:d.rates.USD,tryR:d.rates.TRY};}
+  }catch{}
+  // Second fallback: use USD as bridge via exchangerate.host
+  try{
+    const r=await fetchWithTimeout("https://api.exchangerate-api.com/v4/latest/EUR",5000);
+    if(r.ok){const d=await r.json();return{usd:d.rates.USD,tryR:d.rates.TRY};}
+  }catch{}
+  return null;
+}
+
+async function fetchGoldPrice(usdTry){
+  // Try gold-api
+  try{
+    const r=await fetchWithTimeout("https://api.gold-api.com/price/XAU",4000);
+    if(r.ok){const d=await r.json();if(d.price) return ((d.price/31.1035)*usdTry).toFixed(0);}
+  }catch{}
+  // Fallback: metals.live (free)
+  try{
+    const r=await fetchWithTimeout("https://metals.live/api/spot/gold",4000);
+    if(r.ok){const d=await r.json();const price=d?.price||d?.[0]?.price;if(price) return ((price/31.1035)*usdTry).toFixed(0);}
+  }catch{}
+  return null;
+}
+
+async function updateCurrency(){
+  const usdEl=document.querySelector("#eur-usd span");
+  const tryEl=document.querySelector("#eur-try span");
+  const goldEl=document.querySelector("#gram-gold span");
+
+  const rates=await fetchEurRates();
+  if(rates){
+    const {usd,tryR}=rates;
+    usdEl.textContent=usd.toFixed(2);usdEl.classList.remove("cur-loading");
+    tryEl.textContent=tryR.toFixed(2);tryEl.classList.remove("cur-loading");
+    const usdTry=tryR/usd;
+    const gold=await fetchGoldPrice(usdTry);
+    if(gold){goldEl.textContent=gold+" TL";goldEl.classList.remove("cur-loading");}
+    else{goldEl.textContent="N/A";}
+  } else {
+    // All sources failed — show stale or error state gracefully
+    if(usdEl.classList.contains("cur-loading")) usdEl.textContent="—";
+    if(tryEl.classList.contains("cur-loading")) tryEl.textContent="—";
+    if(goldEl.classList.contains("cur-loading")) goldEl.textContent="—";
+    // Retry after 30s instead of 1h
+    setTimeout(updateCurrency, 30000);
+    return;
+  }
 }
 
 /* ══ LEADERBOARD ══ */
@@ -848,7 +957,6 @@ function updateLeaderboard(){
       const color=getUserColor(c.data.name);
       const fc=LIGHT.has(c.data.name)?"#000":"#fff";
       const ts=LIGHT.has(c.data.name)?"none":"0 1px 2px rgba(0,0,0,.5)";
-      /* FIX 2: badge only, no duplicate plain name text */
       row.innerHTML=`
         <div class="lb-emoji">${c.emoji}</div>
         <div class="lb-info">
@@ -873,27 +981,21 @@ function getWheelFilms(){
   return allFilms.filter(f=>f.uploader!==curUser.name);
 }
 
-/* ── Çark motoru: DPI-aware canvas rendering ── */
 function makeWheelEngine(canvasId){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return null;
   const ctx = canvas.getContext("2d");
-
-  // Retina/HiDPI fix — render at 2x, display at 1x
   const dpr = window.devicePixelRatio || 1;
   const cssW = canvas.offsetWidth || parseInt(canvas.style.width) || canvas.width;
   const cssH = canvas.offsetHeight || parseInt(canvas.style.height) || canvas.height;
   canvas.width  = cssW * dpr;
   canvas.height = cssH * dpr;
   ctx.scale(dpr, dpr);
-
   let angle = 0;
-
   function draw(films){
     const W = cssW, H = cssH;
     const cx = W/2, cy = H/2, r = cx - 4;
     ctx.clearRect(0, 0, W, H);
-
     if(!films || films.length === 0){
       ctx.fillStyle = "#333";
       ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
@@ -902,15 +1004,12 @@ function makeWheelEngine(canvasId){
       ctx.fillText("Film yok 😢", cx, cy);
       return;
     }
-
     const slice = (Math.PI*2) / films.length;
     films.forEach((f,i)=>{
       const start = angle + i*slice, end = start + slice;
       ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end); ctx.closePath();
       ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length]; ctx.fill();
       ctx.strokeStyle = "rgba(255,255,255,.25)"; ctx.lineWidth = 1.5; ctx.stroke();
-
-      // Text — drawn from center outward, no blurriness
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(start + slice/2);
@@ -926,8 +1025,6 @@ function makeWheelEngine(canvasId){
       ctx.fillText(title, r - 10, 4);
       ctx.restore();
     });
-
-    // Center circle
     ctx.beginPath(); ctx.arc(cx,cy,20,0,Math.PI*2);
     ctx.fillStyle = "#1a1a2e"; ctx.fill();
     ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2.5; ctx.stroke();
@@ -936,55 +1033,34 @@ function makeWheelEngine(canvasId){
     ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
     ctx.fillText("🎬", cx, cy);
   }
-
   function getAngle(){ return angle; }
   function setAngle(a){ angle = a; }
-
-  /* Kazanan hesabı: spin bitince pointer (saat 12 = -π/2) altındaki dilimi bul */
   function getWinnerIdx(films){
     const slice = (Math.PI*2) / films.length;
-    // Normalize angle to [0, 2π)
-    const norm = ((angle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-    // Pointer is at -π/2 = 3π/2 in [0,2π) space
     const pointer = (3 * Math.PI / 2);
-    // Find which slice is under the pointer
     for(let i = 0; i < films.length; i++){
-      const start = ((i * slice) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
-      const end   = (((i+1) * slice) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
-      // Account for the wheel rotation: actual start of slice i under pointer when:
-      // (pointer - norm) lands in slice i's original range
-      const relPointer = ((pointer - norm) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+      const relPointer = ((pointer - angle) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
       const sliceStart = (i * slice) % (Math.PI*2);
       const sliceEnd   = ((i+1) * slice) % (Math.PI*2);
       if(sliceStart <= relPointer && relPointer < sliceEnd) return i;
     }
     return 0;
   }
-
   return { draw, getAngle, setAngle, getWinnerIdx };
 }
 
-/* ── Spin logic shared between modal & side widget ── */
 function spinWheel(engine, films, spinBtn, resultEl){
   if(!engine || !films.length) return;
-
   const winnerIdx  = Math.floor(Math.random() * films.length);
   const slice      = (Math.PI*2) / films.length;
   const extraSpins = 5 + Math.random()*3;
-
-  // Target: pointer (-π/2) should align with middle of winner slice
-  // wheel angle needed: pointer = angle + winnerIdx*slice + slice/2
-  // => finalAngle = pointer - winnerIdx*slice - slice/2 - extraSpins*2π
   const finalAngle = (-Math.PI/2) - winnerIdx*slice - slice/2 - extraSpins*Math.PI*2;
-
   const startAngle = engine.getAngle();
   const duration   = 4000 + Math.random()*1000;
   const startTime  = performance.now();
   spinBtn.disabled = true;
   resultEl.style.display = "none";
-
   function easeOut(t){ return 1 - Math.pow(1-t, 3.5); }
-
   function animate(now){
     const t = Math.min((now - startTime) / duration, 1);
     engine.setAngle(startAngle + (finalAngle - startAngle) * easeOut(t));
@@ -993,7 +1069,6 @@ function spinWheel(engine, films, spinBtn, resultEl){
       requestAnimationFrame(animate);
     } else {
       spinBtn.disabled = false;
-      // Read winner from actual final angle (not pre-calculated) for accuracy
       const actualIdx = engine.getWinnerIdx(films);
       const winner = films[actualIdx];
       resultEl.style.display = "block";
@@ -1008,9 +1083,7 @@ function spinWheel(engine, films, spinBtn, resultEl){
   requestAnimationFrame(animate);
 }
 
-/* ── Side widget (sağ panel) ── */
 let sideEngine = null;
-
 function initSideWheel(){
   sideEngine = makeWheelEngine("wheel-canvas-side");
   if(!sideEngine) return;
@@ -1019,14 +1092,12 @@ function initSideWheel(){
   const outer  = document.getElementById("wheel-outer-side");
   const spinBtn= document.getElementById("wheel-spin-btn-side");
   const result = document.getElementById("wheel-result-side");
-
   if(films.length === 0){
     noFilm.style.display = "block"; outer.style.display = "none"; spinBtn.style.display = "none";
   } else {
     noFilm.style.display = "none"; outer.style.display = "block"; spinBtn.style.display = "inline-flex";
     sideEngine.draw(films);
   }
-
   spinBtn.addEventListener("click", ()=>{
     const f = getWheelFilms();
     if(!f.length){ toast("Başkalarının eklediği film yok!","wrn"); return; }
@@ -1034,7 +1105,6 @@ function initSideWheel(){
   });
 }
 
-// Init side wheel after films load (called from onValue films listener)
 function refreshSideWheel(){
   if(!sideEngine){ initSideWheel(); return; }
   const films = getWheelFilms();
@@ -1049,7 +1119,6 @@ function refreshSideWheel(){
   }
 }
 
-// Initialize side wheel once DOM is ready
 setTimeout(initSideWheel, 100);
 
 updateTime();setInterval(updateTime,1000);
