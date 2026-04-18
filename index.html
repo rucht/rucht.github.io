@@ -246,6 +246,23 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
 .wc-widget .wc-icon{font-size:2rem;margin-bottom:6px}
 .wc-widget .wc-title{font-family:'Poppins',sans-serif;font-weight:800;font-size:1rem;color:#f0b429;letter-spacing:1px}
 .wc-widget .wc-sub{font-size:.75rem;color:rgba(240,180,41,.6);margin-top:4px}
+/* WORDLE WIDGET */
+.wordle-widget-link{text-decoration:none;display:block}
+.wordle-widget{
+  background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(245,158,11,.08));
+  border:1px solid rgba(34,197,94,.3);
+  cursor:pointer;transition:.2s;text-align:center;padding:18px 16px;
+  border-radius:var(--radius);box-shadow:var(--shadow);
+}
+.wordle-widget:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.wordle-widget .ww-tiles{display:flex;justify-content:center;gap:4px;margin-bottom:8px}
+.wordle-widget .ww-tile{
+  width:22px;height:22px;border-radius:4px;font-size:.7rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:'Space Mono',monospace;
+}
+.wordle-widget .ww-title{font-weight:800;font-size:1rem;color:#22c55e;letter-spacing:1px}
+.wordle-widget .ww-sub{font-size:.75rem;color:rgba(34,197,94,.6);margin-top:4px}
 /* RESPONSIVE */
 @media(max-width:1280px){#app-layout{grid-template-columns:1fr}#left-panel,#right-panel{display:none}.fab-wrap{display:flex}body{padding-top:80px}}
 @media(max-width:600px){#user-grid{grid-template-columns:repeat(2,1fr)}#currency-ticker{font-size:.72rem;gap:8px}#cities{grid-template-columns:1fr 1fr}.gallery-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}.wheel-outer,.wheel-canvas{width:230px;height:230px}}
@@ -286,7 +303,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   <button class="icon-btn" id="theme-btn">🌙</button>
 </div>
 
-<!-- EVENT MODAL -->
 <div class="modal-wrap" id="ev-modal">
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" id="ev-close">×</button>
@@ -299,7 +315,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   </div>
 </div>
 
-<!-- FILM MODAL -->
 <div class="modal-wrap" id="film-modal">
   <div class="modal-box" style="max-height:90vh" onclick="event.stopPropagation()">
     <button class="modal-close" id="film-modal-close">×</button>
@@ -317,7 +332,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   </div>
 </div>
 
-<!-- WHEEL MODAL -->
 <div class="modal-wrap" id="wheel-modal">
   <div class="modal-box" style="max-width:420px;align-items:center" onclick="event.stopPropagation()">
     <button class="modal-close" id="wheel-modal-close">×</button>
@@ -335,7 +349,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   </div>
 </div>
 
-<!-- LEADERBOARD MODAL -->
 <div class="modal-wrap" id="lb-modal">
   <div class="modal-box" style="max-width:420px" onclick="event.stopPropagation()">
     <button class="modal-close" id="lb-modal-close">×</button>
@@ -346,7 +359,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
 
 <div id="mob-backdrop"></div>
 
-<!-- MOBILE CAL PANEL -->
 <div class="mob-panel" id="mob-cal-panel">
   <div class="panel-handle"></div>
   <div class="cal-nav">
@@ -358,7 +370,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   <div class="cal-grid" id="cal-grid2"></div>
 </div>
 
-<!-- MOBILE FILM PANEL -->
 <div class="mob-panel" id="mob-film-panel">
   <div class="panel-handle"></div>
   <p style="font-weight:700;font-size:.95rem;margin-bottom:10px">🎬 Watchlist</p>
@@ -375,22 +386,20 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
   <button class="load-more-btn" id="mob-expand-films" style="margin-top:10px">Tümünü Gör ⤢</button>
 </div>
 
-<!-- FAB -->
 <div class="fab-wrap">
   <button class="fab" id="fab-cal">📅 Takvim</button>
   <button class="fab" id="fab-film">🎬 Filmler</button>
   <button class="fab" id="fab-lb">🏆 Liderlik</button>
   <button class="fab" id="fab-wheel">🎰 Çark</button>
   <button class="fab" id="fab-wc" onclick="window.location.href='worldcup.html'">⚽ Dünya Kupası</button>
+  <button class="fab" id="fab-wordle" onclick="window.location.href='wordle.html'">🟩 Wordle</button>
 </div>
 
-<!-- APP LAYOUT -->
 <div id="app-layout">
   <div id="left-panel">
     <div class="widget">
       <div class="widget-title">📅 Takvim</div>
 
-      <!-- TODAY'S EVENTS PREVIEW — shown above calendar grid -->
       <div id="today-events-preview">
         <div class="tev-title">📌 Bugün</div>
         <div id="today-events-list"></div>
@@ -410,12 +419,25 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
       <div id="lb-list-side"></div>
     </div>
 
-    <!-- WORLD CUP WIDGET — moved here from above app-layout -->
     <a href="worldcup.html" class="wc-widget-link">
       <div class="wc-widget">
         <div class="wc-icon">⚽</div>
         <div class="wc-title">DÜNYA KUPASI 2026</div>
         <div class="wc-sub">Turnuva Simülatörü →</div>
+      </div>
+    </a>
+
+    <a href="wordle.html" class="wordle-widget-link">
+      <div class="wordle-widget">
+        <div class="ww-tiles">
+          <div class="ww-tile" style="background:#374151">W</div>
+          <div class="ww-tile" style="background:#f59e0b">O</div>
+          <div class="ww-tile" style="background:#22c55e">R</div>
+          <div class="ww-tile" style="background:#374151">D</div>
+          <div class="ww-tile" style="background:#22c55e">L</div>
+        </div>
+        <div class="ww-title">WORDLE</div>
+        <div class="ww-sub">Günlük Kelime Oyunu →</div>
       </div>
     </a>
   </div>
@@ -457,7 +479,6 @@ body.dark .lb-row{background:rgba(255,255,255,.04)}
       <div class="film-list-inner" id="film-list-side"></div>
       <button class="load-more-btn" id="expand-films" style="margin-top:10px">Tümünü Gör ⤢</button>
     </div>
-    <!-- WHEEL INLINE WIDGET -->
     <div class="widget" id="wheel-widget">
       <div class="widget-title">🎰 Bu Gece Ne İzlesek?</div>
       <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:12px;line-height:1.4">Arkadaşlarının eklediği filmlerden rastgele seçer. Senin filmlerin hariç!</p>
