@@ -63,7 +63,14 @@ body{
 }
 .back-btn:hover{background:rgba(255,255,255,.12)}
 .top-logo{font-family:"Space Mono",monospace;font-weight:700;font-size:1rem;color:var(--accent);letter-spacing:2px}
+.topbar-right{display:flex;align-items:center;gap:8px}
 #user-chip{padding:5px 14px;border-radius:20px;font-weight:700;font-size:.8rem;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+#admin-btn{
+  background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--muted);padding:6px 10px;border-radius:20px;cursor:pointer;
+  font-size:.75rem;font-family:"Poppins",sans-serif;transition:.2s;
+}
+#admin-btn:hover{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:var(--accent)}
 
 /* PROGRESS */
 #progress-wrap{width:100%;max-width:560px;padding:18px 20px 0}
@@ -151,7 +158,7 @@ body{
 }
 #finish-screen.on{display:flex}
 .fs-inner{
-  max-width:520px;width:100%;
+  max-width:560px;width:100%;
   background:var(--surface);border:1px solid var(--border);
   border-radius:20px;padding:28px;
   box-shadow:0 16px 60px rgba(0,0,0,.7);
@@ -189,7 +196,12 @@ body{
 
 /* LEADERBOARD in finish */
 .fs-lb-title{font-weight:700;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-align:center}
-.fs-lb-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:6px}
+.fs-lb-row{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;
+  background:var(--surface2);border:1px solid var(--border);margin-bottom:6px;
+  cursor:pointer;transition:border-color .2s;
+}
+.fs-lb-row:hover{border-color:rgba(255,255,255,.2)}
 .fs-lb-row.you{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.06)}
 .fs-lb-rank{font-family:"Space Mono",monospace;font-size:.8rem;font-weight:700;width:22px;text-align:center;color:var(--muted)}
 .fs-lb-rank.g{color:#fbbf24}.fs-lb-rank.s{color:#94a3b8}.fs-lb-rank.b{color:#b45309}
@@ -197,6 +209,111 @@ body{
 .fs-lb-info{flex:1;min-width:0}
 .fs-lb-sub{font-size:.65rem;color:var(--muted)}
 .fs-lb-pts{font-family:"Space Mono",monospace;font-size:.9rem;font-weight:700;color:var(--accent)}
+.fs-lb-eye{font-size:.75rem;color:var(--muted);margin-left:4px}
+
+/* ══ PLAYER REPLAY MODAL ══ */
+#replay-modal{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,12,16,.97);backdrop-filter:blur(16px);
+  z-index:1200;align-items:flex-start;justify-content:center;
+  overflow-y:auto;padding:20px;
+}
+#replay-modal.on{display:flex}
+.rm-inner{
+  max-width:560px;width:100%;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:24px;
+  box-shadow:0 16px 60px rgba(0,0,0,.8);
+  margin:auto;animation:fadeUp .3s ease;
+}
+.rm-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.rm-title{font-family:"Space Mono",monospace;font-weight:700;font-size:1.1rem;color:var(--text)}
+.rm-close{
+  background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--muted);padding:5px 12px;border-radius:16px;cursor:pointer;
+  font-size:.78rem;font-family:"Poppins",sans-serif;transition:.2s;
+}
+.rm-close:hover{background:rgba(255,255,255,.12);color:var(--text)}
+.rm-score-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+.rm-badge{padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:700;color:#fff}
+.rm-total{font-family:"Space Mono",monospace;font-size:1.2rem;font-weight:700;color:var(--accent);margin-left:auto}
+.rm-total-label{font-size:.72rem;color:var(--muted)}
+.rm-questions{display:flex;flex-direction:column;gap:8px}
+.rm-q-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .2s}
+.rm-q-item:hover{border-color:rgba(255,255,255,.18)}
+.rm-q-hdr{display:flex;align-items:center;gap:10px}
+.rm-q-num{font-family:"Space Mono",monospace;font-size:.78rem;color:var(--muted);width:20px;flex-shrink:0}
+.rm-q-word{font-family:"Space Mono",monospace;font-weight:700;font-size:.88rem;letter-spacing:2px;flex:1}
+.rm-q-badge{padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700;flex-shrink:0}
+.rm-q-badge.win{background:rgba(34,197,94,.15);color:var(--correct);border:1px solid rgba(34,197,94,.3)}
+.rm-q-badge.fail{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+.rm-q-pts{font-family:"Space Mono",monospace;color:var(--accent);font-size:.82rem;font-weight:700;flex-shrink:0}
+.rm-q-chev{color:var(--muted);font-size:.7rem;transition:transform .2s;margin-left:6px}
+.rm-q-body{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.rm-q-item.expanded .rm-q-body{display:block}
+.rm-q-item.expanded .rm-q-chev{transform:rotate(180deg)}
+.rm-board{display:flex;flex-direction:column;gap:3px}
+.rm-row{display:flex;gap:3px}
+.rm-tile{width:30px;height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:"Space Mono",monospace;font-size:.8rem;font-weight:700;text-transform:uppercase}
+.rm-tile.c{background:var(--correct);color:#fff}
+.rm-tile.p{background:var(--present);color:#111}
+.rm-tile.a{background:var(--absent);color:var(--absent-txt)}
+.rm-loading{text-align:center;padding:30px;color:var(--muted);font-size:.85rem}
+
+/* ══ ADMIN MODAL ══ */
+#admin-modal{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,12,16,.97);backdrop-filter:blur(16px);
+  z-index:1300;align-items:center;justify-content:center;
+  padding:20px;overflow-y:auto;
+}
+#admin-modal.on{display:flex}
+.am-inner{
+  max-width:480px;width:100%;
+  background:var(--surface);border:1px solid rgba(245,158,11,.25);
+  border-radius:20px;padding:28px;
+  box-shadow:0 16px 60px rgba(0,0,0,.8);
+  animation:fadeUp .3s ease;
+}
+.am-title{font-family:"Space Mono",monospace;font-size:1.1rem;font-weight:700;color:var(--accent);text-align:center;margin-bottom:6px;letter-spacing:2px}
+.am-sub{text-align:center;color:var(--muted);font-size:.8rem;margin-bottom:20px}
+.am-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:11px 14px;color:var(--text);
+  font-family:"Space Mono",monospace;font-size:.95rem;outline:none;
+  transition:border-color .2s;
+}
+.am-input:focus{border-color:var(--accent)}
+.am-btn{
+  width:100%;padding:12px;border:none;border-radius:10px;
+  font-weight:700;font-size:.9rem;font-family:"Poppins",sans-serif;
+  cursor:pointer;transition:.2s;margin-top:10px;
+}
+.am-btn.primary{background:var(--accent);color:#111}
+.am-btn.primary:hover{background:#e08a00}
+.am-btn.danger{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.am-btn.danger:hover{background:rgba(239,68,68,.25)}
+.am-btn.ghost{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+.am-btn.ghost:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.am-word-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.am-word-row{display:flex;align-items:center;gap:10px}
+.am-word-label{font-family:"Space Mono",monospace;font-size:.75rem;color:var(--muted);width:60px;flex-shrink:0}
+.am-word-input{
+  flex:1;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:9px 12px;color:var(--text);
+  font-family:"Space Mono",monospace;font-size:.9rem;outline:none;
+  text-transform:lowercase;transition:border-color .2s;
+}
+.am-word-input:focus{border-color:var(--accent)}
+.am-word-input.ok{border-color:var(--correct)}
+.am-word-input.err{border-color:#ef4444}
+.am-word-count{font-family:"Space Mono",monospace;font-size:.7rem;width:20px;text-align:center;flex-shrink:0}
+.am-divider{height:1px;background:var(--border);margin:16px 0}
+.am-warning{
+  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
+  border-radius:8px;padding:10px 14px;font-size:.78rem;color:#ef4444;
+  text-align:center;margin-bottom:12px;
+}
 
 /* TOAST */
 #toast-wrap{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
@@ -229,7 +346,10 @@ body{
 <div id="topbar">
   <button class="back-btn" onclick="window.location.href='index.html'">← Ana Sayfa</button>
   <div class="top-logo">WORDLE</div>
-  <div id="user-chip">—</div>
+  <div class="topbar-right">
+    <button id="admin-btn" title="Yönetici Paneli">⚙️ Kelimeler</button>
+    <div id="user-chip">—</div>
+  </div>
 </div>
 
 <!-- PROGRESS -->
@@ -267,27 +387,53 @@ body{
   </div>
 </div>
 
+<!-- PLAYER REPLAY MODAL -->
+<div id="replay-modal">
+  <div class="rm-inner">
+    <div class="rm-header">
+      <div class="rm-title" id="rm-title">Oyuncu Tekrarı</div>
+      <button class="rm-close" onclick="closeReplay()">✕ Kapat</button>
+    </div>
+    <div id="rm-content"></div>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-modal">
+  <div class="am-inner" id="am-inner">
+    <!-- content injected by JS -->
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, get }
+import { getDatabase, ref, onValue, set, get, remove }
   from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const FB={apiKey:"AIzaSyCUTBQ5oIgF1GEU8rGj9Mxqz7a2g1Ecswk",authDomain:"timetemp-9b1a5.firebaseapp.com",databaseURL:"https://timetemp-9b1a5-default-rtdb.firebaseio.com/",projectId:"timetemp-9b1a5",storageBucket:"timetemp-9b1a5.firebasestorage.app",messagingSenderId:"580366684921",appId:"1:580366684921:web:2133261bcfccc0a21a0828"};
 const app=initializeApp(FB);
 const db=getDatabase(app);
 
-/* ══════════════════════════════════
-   KELİMELER — sırayla 10 soru
-   Max puan: 10 × 6 = 60
-══════════════════════════════════ */
-const WORDS=["taşak","elçik","lidya","münih","bokan","yorum","lvbel","yakup","cehap","uysal"];
+/* ══ ADMIN ══ */
+const ADMIN_PASS="gs123gs123";
+const DEFAULT_WORDS=["taşak","elçik","lidya","münih","bokan","yorum","lvbel","yakup","cehap","uysal"];
 
-const SESSION_VER=4; // bump if you change WORDS
-const SESSION_KEY=`wrd_s_${SESSION_VER}`;
+let WORDS=[...DEFAULT_WORDS];
+let SESSION_VER=4;
+let SESSION_KEY=`wrd_s_${SESSION_VER}`;
 
-/* ══════════════════════════════════
-   USERS
-══════════════════════════════════ */
+/* Load words & version from Firebase */
+async function loadWordsFromFirebase(){
+  const snap=await get(ref(db,"wordle_config"));
+  const cfg=snap.val();
+  if(cfg&&cfg.words&&cfg.words.length===10){
+    WORDS=cfg.words;
+    SESSION_VER=cfg.version||4;
+    SESSION_KEY=`wrd_s_${SESSION_VER}`;
+  }
+}
+
+/* ══ USERS ══ */
 const USERS=[
   {name:"AK",color:"#e74c3c"},{name:"KD",color:"#e67e22"},
   {name:"MA",color:"#2ecc71"},{name:"AKK",color:"#9b59b6"},
@@ -298,35 +444,34 @@ const LIGHT=new Set(["HAC","KBE"]);
 let curUser=JSON.parse(localStorage.getItem("curUser")||"null");
 
 const authEl=document.getElementById("auth-overlay");
-if(curUser){authEl.style.display="none";applyChip()}
-else{
-  const grid=document.getElementById("user-grid");
-  USERS.forEach(u=>{
-    const b=document.createElement("button");b.className="user-btn";
-    b.style.background=u.color;b.textContent=u.name;
-    if(LIGHT.has(u.name)){b.style.color="#000";b.style.textShadow="none"}
-    b.addEventListener("click",()=>{
-      curUser=u;localStorage.setItem("curUser",JSON.stringify(u));
-      authEl.style.display="none";applyChip();startSession();
+
+async function init(){
+  await loadWordsFromFirebase();
+  if(curUser){authEl.style.display="none";applyChip();startSession();}
+  else{
+    const grid=document.getElementById("user-grid");
+    USERS.forEach(u=>{
+      const b=document.createElement("button");b.className="user-btn";
+      b.style.background=u.color;b.textContent=u.name;
+      if(LIGHT.has(u.name)){b.style.color="#000";b.style.textShadow="none"}
+      b.addEventListener("click",()=>{
+        curUser=u;localStorage.setItem("curUser",JSON.stringify(u));
+        authEl.style.display="none";applyChip();startSession();
+      });
+      grid.appendChild(b);
     });
-    grid.appendChild(b);
-  });
+  }
 }
+
 function applyChip(){
   const chip=document.getElementById("user-chip");
   chip.textContent=curUser.name;chip.style.background=curUser.color;
   if(LIGHT.has(curUser.name)){chip.style.color="#000";chip.style.textShadow="none"}
 }
 
-/* ══════════════════════════════════
-   SESSION
-══════════════════════════════════ */
+/* ══ SESSION ══ */
 function freshSession(){
-  return{
-    v:SESSION_VER,
-    q:WORDS.map(()=>({guesses:[],done:false,won:false,pts:0})),
-    total:0,cur:0,finished:false
-  };
+  return{v:SESSION_VER,q:WORDS.map(()=>({guesses:[],done:false,won:false,pts:0})),total:0,cur:0,finished:false};
 }
 function loadSession(){
   try{
@@ -341,9 +486,7 @@ let session=null;
 let currentGuess="";
 let qDone=false;
 
-/* ══════════════════════════════════
-   PROGRESS
-══════════════════════════════════ */
+/* ══ PROGRESS ══ */
 function buildProgress(){
   const t=document.getElementById("progress-track");t.innerHTML="";
   for(let i=0;i<WORDS.length;i++){
@@ -364,9 +507,7 @@ function updateProgress(){
   document.getElementById("q-score-label").textContent=`${session.total} puan`;
 }
 
-/* ══════════════════════════════════
-   BOARD
-══════════════════════════════════ */
+/* ══ BOARD ══ */
 function buildBoard(){
   const b=document.getElementById("board");b.innerHTML="";
   for(let r=0;r<6;r++){
@@ -395,9 +536,7 @@ function renderSaved(guesses,target){
   updateKeys(guesses,target);
 }
 
-/* ══════════════════════════════════
-   KEYBOARD
-══════════════════════════════════ */
+/* ══ KEYBOARD ══ */
 const TR_KB=[
   ["e","r","t","y","u","ı","o","p","ğ","ü"],
   ["a","s","d","f","g","h","j","k","l","ş","i"],
@@ -438,9 +577,7 @@ function updateKeys(guesses,target){
   });
 }
 
-/* ══════════════════════════════════
-   SCORING
-══════════════════════════════════ */
+/* ══ SCORING ══ */
 function scoreGuess(guess,target){
   const res=Array(5).fill("absent");
   const ta=target.split("");const used=Array(5).fill(false);
@@ -453,9 +590,7 @@ function scoreGuess(guess,target){
 }
 function calcPts(attempts,won){return won?Math.max(1,7-attempts):0}
 
-/* ══════════════════════════════════
-   LOAD QUESTION
-══════════════════════════════════ */
+/* ══ LOAD QUESTION ══ */
 function loadQuestion(qi){
   const qd=session.q[qi];
   const target=WORDS[qi];
@@ -475,12 +610,12 @@ function loadQuestion(qi){
   updateProgress();
 }
 
-/* ══════════════════════════════════
-   INPUT
-══════════════════════════════════ */
+/* ══ INPUT ══ */
 document.addEventListener("keydown",e=>{
   if(authEl.style.display!=="none") return;
   if(document.getElementById("finish-screen").classList.contains("on")) return;
+  if(document.getElementById("admin-modal").classList.contains("on")) return;
+  if(document.getElementById("replay-modal").classList.contains("on")) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
   const k=e.key;
   if(k==="Enter") handleKey("ENTER");
@@ -509,9 +644,7 @@ function renderCurrent(ri){
   }
 }
 
-/* ══════════════════════════════════
-   SUBMIT
-══════════════════════════════════ */
+/* ══ SUBMIT ══ */
 async function submitGuess(){
   const qi=session.cur;
   const qd=session.q[qi];
@@ -533,7 +666,6 @@ async function submitGuess(){
 
   updateKeys(qd.guesses,target);
   currentGuess="";
-  // clear active-cursor from next row
   for(let c=0;c<5;c++){const t=document.getElementById(`t-${ri+1}-${c}`);if(t) t.className="tile"}
 
   const won=res.every(r=>r==="correct");
@@ -547,6 +679,8 @@ async function submitGuess(){
     document.getElementById("keyboard").style.pointerEvents="none";
     updateProgress();
     showResultCard(qi,true);
+    // Save guesses to Firebase so others can see
+    await saveGuessesToFirebase(qi);
     if(qi===WORDS.length-1){
       session.finished=true;save();
       await saveToFirebase();
@@ -557,9 +691,7 @@ async function submitGuess(){
   }
 }
 
-/* ══════════════════════════════════
-   RESULT CARD
-══════════════════════════════════ */
+/* ══ RESULT CARD ══ */
 function showResultCard(qi,animate){
   const qd=session.q[qi];
   const target=WORDS[qi];
@@ -590,9 +722,7 @@ document.getElementById("next-btn").addEventListener("click",()=>{
   loadQuestion(session.cur);
 });
 
-/* ══════════════════════════════════
-   FINISH
-══════════════════════════════════ */
+/* ══ FINISH ══ */
 function showFinish(){
   updateProgress();
   document.getElementById("finish-screen").classList.add("on");
@@ -635,9 +765,18 @@ function buildReview(){
   });
 }
 
-/* ══════════════════════════════════
-   FIREBASE
-══════════════════════════════════ */
+/* ══ FIREBASE ══ */
+async function saveGuessesToFirebase(qi){
+  if(!curUser) return;
+  const qd=session.q[qi];
+  // Save per-question guesses so others can replay
+  await set(ref(db,`wordle_replays/${curUser.name}/q${qi}`),{
+    guesses:qd.guesses,
+    won:qd.won,
+    pts:qd.pts
+  });
+}
+
 async function saveToFirebase(){
   if(!curUser) return;
   const r=ref(db,`wordle_scores/${curUser.name}`);
@@ -662,15 +801,243 @@ function renderLB(data){
     row.innerHTML=`
       <div class="fs-lb-rank ${rankCls[i]||""}">${medals[i]||`#${i+1}`}</div>
       <span class="fs-lb-badge" style="background:${e.color};color:${fc}">${e.name}</span>
-      <div class="fs-lb-info"><div class="fs-lb-sub">${e.played} oyun</div></div>
-      <div class="fs-lb-pts">${e.total}<span style="font-size:.65rem;color:var(--muted)">pt</span></div>`;
+      <div class="fs-lb-info"><div style="font-weight:600;font-size:.82rem">${e.name}</div><div class="fs-lb-sub">${e.played} oyun</div></div>
+      <div class="fs-lb-pts">${e.total}<span style="font-size:.65rem;color:var(--muted)">pt</span></div>
+      <span class="fs-lb-eye">👁</span>`;
+    row.addEventListener("click",()=>openReplay(e));
     el.appendChild(row);
   });
 }
 
-/* ══════════════════════════════════
-   UTILS
-══════════════════════════════════ */
+/* ══════════════════════════════════════════
+   PLAYER REPLAY VIEWER
+══════════════════════════════════════════ */
+window.closeReplay=function(){
+  document.getElementById("replay-modal").classList.remove("on");
+}
+
+async function openReplay(player){
+  const modal=document.getElementById("replay-modal");
+  const content=document.getElementById("rm-content");
+  const titleEl=document.getElementById("rm-title");
+  
+  const fc=LIGHT.has(player.name)?"#000":"#fff";
+  titleEl.innerHTML=`<span style="background:${player.color};color:${fc};padding:3px 10px;border-radius:8px;font-size:.8rem;font-weight:700;margin-right:8px">${player.name}</span> Oyun Tekrarı`;
+  content.innerHTML=`<div class="rm-loading">⏳ Yükleniyor...</div>`;
+  modal.classList.add("on");
+
+  // Fetch replays from Firebase
+  const snap=await get(ref(db,`wordle_replays/${player.name}`));
+  const replayData=snap.val()||{};
+
+  let totalPts=0;
+  const qResults=[];
+  for(let i=0;i<WORDS.length;i++){
+    const q=replayData[`q${i}`]||null;
+    qResults.push(q);
+    if(q) totalPts+=q.pts||0;
+  }
+
+  // Check if player has any data
+  const hasData=qResults.some(q=>q!==null);
+
+  let html=`
+    <div class="rm-score-row">
+      <span class="rm-badge" style="background:${player.color};color:${fc}">${player.name}</span>
+      <span style="font-size:.8rem;color:var(--muted)">${player.played||0} oyun</span>
+      <div style="margin-left:auto;text-align:right">
+        <div class="rm-total">${hasData?totalPts+"pt":"—"}</div>
+        <div class="rm-total-label">bu turda</div>
+      </div>
+    </div>`;
+
+  if(!hasData){
+    html+=`<div style="text-align:center;padding:24px;color:var(--muted);font-size:.85rem">Bu oyuncu henüz oynamadı veya veri yok.</div>`;
+  } else {
+    html+=`<div class="rm-questions">`;
+    WORDS.forEach((word,i)=>{
+      const q=qResults[i];
+      if(!q){
+        html+=`
+          <div class="rm-q-item">
+            <div class="rm-q-hdr">
+              <span class="rm-q-num">${i+1}</span>
+              <span class="rm-q-word">${word.toLocaleUpperCase("tr")}</span>
+              <span class="rm-q-badge fail">—</span>
+              <span class="rm-q-pts">0pt</span>
+            </div>
+          </div>`;
+        return;
+      }
+      const guesses=q.guesses||[];
+      const won=q.won||false;
+      const pts=q.pts||0;
+
+      // Build mini board HTML
+      let boardHTML=`<div class="rm-board">`;
+      if(guesses.length){
+        guesses.forEach(g=>{
+          const res=scoreGuess(g,word);
+          boardHTML+=`<div class="rm-row">`;
+          g.split("").forEach((ch,ci)=>{
+            boardHTML+=`<div class="rm-tile ${res[ci][0]}">${ch.toLocaleUpperCase("tr")}</div>`;
+          });
+          boardHTML+=`</div>`;
+        });
+      } else {
+        boardHTML+=`<span style="font-size:.78rem;color:var(--muted)">Deneme yapılmadı</span>`;
+      }
+      boardHTML+=`</div>`;
+
+      html+=`
+        <div class="rm-q-item" onclick="this.classList.toggle('expanded')">
+          <div class="rm-q-hdr">
+            <span class="rm-q-num">${i+1}</span>
+            <span class="rm-q-word">${word.toLocaleUpperCase("tr")}</span>
+            <span class="rm-q-badge ${won?"win":"fail"}">${won?guesses.length+"/6":"✗"}</span>
+            <span class="rm-q-pts">${pts>0?"+"+pts:"0"}pt</span>
+            <span class="rm-q-chev">▼</span>
+          </div>
+          <div class="rm-q-body">${boardHTML}</div>
+        </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  content.innerHTML=html;
+}
+
+/* ══════════════════════════════════════════
+   ADMIN PANEL — Kelime Değiştirme
+══════════════════════════════════════════ */
+document.getElementById("admin-btn").addEventListener("click",()=>{
+  showAdminStep1();
+  document.getElementById("admin-modal").classList.add("on");
+});
+
+function showAdminStep1(){
+  const inner=document.getElementById("am-inner");
+  inner.innerHTML=`
+    <div class="am-title">⚙️ YÖNETİCİ PANELİ</div>
+    <div class="am-sub">Devam etmek için şifreyi girin</div>
+    <input class="am-input" id="am-pass-input" type="password" placeholder="Şifre..." autocomplete="off"/>
+    <button class="am-btn primary" id="am-pass-ok" style="margin-top:12px">Giriş →</button>
+    <button class="am-btn ghost" onclick="closeAdmin()" style="margin-top:6px">İptal</button>`;
+  
+  const passInput=inner.querySelector("#am-pass-input");
+  const okBtn=inner.querySelector("#am-pass-ok");
+  
+  passInput.addEventListener("keydown",e=>{if(e.key==="Enter") tryAdminPass();});
+  okBtn.addEventListener("click",tryAdminPass);
+  setTimeout(()=>passInput.focus(),100);
+}
+
+function tryAdminPass(){
+  const val=document.getElementById("am-pass-input").value;
+  if(val===ADMIN_PASS){
+    showAdminWordEditor();
+  } else {
+    toast("❌ Yanlış şifre!");
+    document.getElementById("am-pass-input").value="";
+    document.getElementById("am-pass-input").classList.add("err");
+    setTimeout(()=>document.getElementById("am-pass-input")?.classList.remove("err"),600);
+  }
+}
+
+function showAdminWordEditor(){
+  const inner=document.getElementById("am-inner");
+  let wordInputsHTML=`<div class="am-word-grid">`;
+  for(let i=0;i<10;i++){
+    wordInputsHTML+=`
+      <div class="am-word-row">
+        <span class="am-word-label">Kelime ${i+1}</span>
+        <input class="am-word-input" id="aw-${i}" maxlength="8" placeholder="5 harf..." value="${WORDS[i]||""}" autocomplete="off" spellcheck="false"/>
+        <span class="am-word-count" id="awc-${i}">${(WORDS[i]||"").length}/5</span>
+      </div>`;
+  }
+  wordInputsHTML+=`</div>`;
+
+  inner.innerHTML=`
+    <div class="am-title">📝 YENİ KELİMELER</div>
+    <div class="am-sub">10 soru için 5'er harfli kelimeler girin</div>
+    ${wordInputsHTML}
+    <div class="am-warning">⚠️ Onaylandığında liderlik tablosu ve tüm oyunlar sıfırlanacak!</div>
+    <button class="am-btn primary" id="am-confirm-btn">✅ Onayla ve Sıfırla</button>
+    <button class="am-btn ghost" onclick="closeAdmin()" style="margin-top:6px">İptal</button>`;
+
+  // Live character count & validation
+  for(let i=0;i<10;i++){
+    const inp=document.getElementById(`aw-${i}`);
+    const cnt=document.getElementById(`awc-${i}`);
+    inp.addEventListener("input",()=>{
+      const v=inp.value.trim().toLocaleLowerCase("tr");
+      inp.value=v;
+      const len=[...v].length; // handle multibyte Turkish chars
+      cnt.textContent=`${Math.min(len,5)}/5`;
+      cnt.style.color=len===5?"var(--correct)":len>5?"#ef4444":"var(--muted)";
+      inp.className="am-word-input"+(len===5?" ok":len>5?" err":"");
+    });
+  }
+
+  document.getElementById("am-confirm-btn").addEventListener("click",confirmNewWords);
+}
+
+async function confirmNewWords(){
+  const newWords=[];
+  let valid=true;
+  for(let i=0;i<10;i++){
+    const val=document.getElementById(`aw-${i}`).value.trim().toLocaleLowerCase("tr");
+    const len=[...val].length;
+    if(len!==5){
+      toast(`Kelime ${i+1} tam 5 harf olmalı!`);
+      document.getElementById(`aw-${i}`).focus();
+      valid=false;break;
+    }
+    newWords.push(val);
+  }
+  if(!valid) return;
+
+  const btn=document.getElementById("am-confirm-btn");
+  btn.disabled=true;btn.textContent="⏳ Kaydediliyor...";
+
+  try{
+    // Bump version
+    const newVer=(SESSION_VER||4)+1;
+
+    // Save config to Firebase
+    await set(ref(db,"wordle_config"),{words:newWords,version:newVer,updatedAt:Date.now()});
+
+    // Wipe leaderboard
+    await set(ref(db,"wordle_scores"),null);
+
+    // Wipe replays
+    await set(ref(db,"wordle_replays"),null);
+
+    toast("✅ Kelimeler güncellendi! Herkes tekrar oynayabilir.");
+    closeAdmin();
+
+    // Reload page so everyone gets fresh state
+    setTimeout(()=>window.location.reload(),800);
+
+  } catch(err){
+    toast("❌ Hata: "+err.message);
+    btn.disabled=false;btn.textContent="✅ Onayla ve Sıfırla";
+  }
+}
+
+window.closeAdmin=function(){
+  document.getElementById("admin-modal").classList.remove("on");
+}
+
+// Close admin modal on backdrop click
+document.getElementById("admin-modal").addEventListener("click",e=>{
+  if(e.target===document.getElementById("admin-modal")) closeAdmin();
+});
+document.getElementById("replay-modal").addEventListener("click",e=>{
+  if(e.target===document.getElementById("replay-modal")) closeReplay();
+});
+
+/* ══ UTILS ══ */
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 
 function shakeRow(ri){
@@ -678,20 +1045,17 @@ function shakeRow(ri){
   row.querySelectorAll(".tile").forEach(t=>{t.classList.add("shake");setTimeout(()=>t.classList.remove("shake"),400)});
 }
 
-function toast(msg,dur=2000){
+function toast(msg,dur=2500){
   const c=document.getElementById("toast-wrap");
   const d=document.createElement("div");d.className="toast";d.textContent=msg;c.appendChild(d);
   setTimeout(()=>{d.style.transition="opacity .3s";d.style.opacity="0";setTimeout(()=>d.remove(),320)},dur);
 }
 
-/* ══════════════════════════════════
-   START
-══════════════════════════════════ */
+/* ══ START ══ */
 function startSession(){
   session=loadSession()||freshSession();
   buildProgress();buildBoard();buildKeyboard();
   if(session.finished){
-    // Restore last question visually, then show finish
     loadQuestion(WORDS.length-1);
     setTimeout(showFinish,200);
   } else {
@@ -699,7 +1063,7 @@ function startSession(){
   }
 }
 
-if(curUser) startSession();
+init();
 </script>
 </body>
 </html>
