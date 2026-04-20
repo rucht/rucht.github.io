@@ -798,27 +798,41 @@ function buildReview(){
   const list=document.getElementById("review-list");list.innerHTML="";
   WORDS.forEach((word,i)=>{
     const qd=session.q[i];
+    const isDone=qd.done; // Only reveal word/result if the question was actually played & finished
+
     const item=document.createElement("div");item.className="rv-item";
     const hdr=document.createElement("div");hdr.className="rv-hdr";
-    hdr.innerHTML=`<span class="rv-num">${i+1}</span>
-      <span class="rv-word">${word.toLocaleUpperCase("tr")}</span>
-      <span class="rv-badge ${qd.won?"win":"fail"}">${qd.won?qd.guesses.length+"/6":"✗"}</span>
-      <span class="rv-pts">${qd.pts>0?"+"+qd.pts:"0"}pt</span>
-      <span class="rv-chevron">▼</span>`;
-    const body=document.createElement("div");body.className="rv-body";
-    const board=document.createElement("div");board.className="rv-board";
-    if(qd.guesses.length){
-      qd.guesses.forEach(g=>{
-        const res=scoreGuess(g,word);const row=document.createElement("div");row.className="rv-row";
-        g.split("").forEach((ch,ci)=>{
-          const t=document.createElement("div");t.className=`rv-tile ${res[ci][0]}`;
-          t.textContent=ch.toLocaleUpperCase("tr");row.appendChild(t);
+
+    if(isDone){
+      // Question is finished — show word, result badge, points
+      hdr.innerHTML=`<span class="rv-num">${i+1}</span>
+        <span class="rv-word">${word.toLocaleUpperCase("tr")}</span>
+        <span class="rv-badge ${qd.won?"win":"fail"}">${qd.won?qd.guesses.length+"/6":"✗"}</span>
+        <span class="rv-pts">${qd.pts>0?"+"+qd.pts:"0"}pt</span>
+        <span class="rv-chevron">▼</span>`;
+      const body=document.createElement("div");body.className="rv-body";
+      const board=document.createElement("div");board.className="rv-board";
+      if(qd.guesses.length){
+        qd.guesses.forEach(g=>{
+          const res=scoreGuess(g,word);const row=document.createElement("div");row.className="rv-row";
+          g.split("").forEach((ch,ci)=>{
+            const t=document.createElement("div");t.className=`rv-tile ${res[ci][0]}`;
+            t.textContent=ch.toLocaleUpperCase("tr");row.appendChild(t);
+          });
+          board.appendChild(row);
         });
-        board.appendChild(row);
-      });
-    } else{board.innerHTML='<span style="font-size:.78rem;color:var(--muted)">Deneme yapılmadı</span>';}
-    body.appendChild(board);item.appendChild(hdr);item.appendChild(body);
-    item.addEventListener("click",()=>item.classList.toggle("expanded"));
+      } else{board.innerHTML='<span style="font-size:.78rem;color:var(--muted)">Deneme yapılmadı</span>';}
+      body.appendChild(board);item.appendChild(hdr);item.appendChild(body);
+      item.addEventListener("click",()=>item.classList.toggle("expanded"));
+    } else {
+      // Question not yet played — hide the word, show as locked
+      hdr.innerHTML=`<span class="rv-num">${i+1}</span>
+        <span class="rv-word" style="color:var(--muted);letter-spacing:4px">• • • • •</span>
+        <span class="rv-badge" style="background:rgba(107,122,148,.1);color:var(--muted);border:1px solid rgba(107,122,148,.2);font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:20px">—</span>`;
+      item.style.cursor="default";
+      item.appendChild(hdr);
+    }
+
     list.appendChild(item);
   });
 }
