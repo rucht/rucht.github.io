@@ -29,7 +29,7 @@ body{font-family:"Poppins",sans-serif;background:var(--bg);color:var(--text);
   cursor:pointer;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);
   box-shadow:0 4px 16px rgba(0,0,0,.4);transition:transform .2s,box-shadow .2s;font-family:"Poppins",sans-serif;}
 .user-btn:hover{transform:translateY(-4px) scale(1.06);box-shadow:0 12px 28px rgba(0,0,0,.55)}
-/* TOPBAR (Z-index artırıldı) */
+/* TOPBAR */
 #topbar{width:100%;height:56px;background:rgba(10,12,16,.92);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;
   padding:0 16px;position:sticky;top:0;z-index:2000;gap:8px;}
@@ -98,7 +98,13 @@ body{font-family:"Poppins",sans-serif;background:var(--bg);color:var(--text);
   transition:transform .2s,box-shadow .2s;letter-spacing:.5px;animation:fadeUp .4s ease;}
 #next-btn:hover{transform:scale(1.05);box-shadow:0 6px 28px rgba(34,197,94,.5)}
 #next-btn:active{transform:scale(.96)}
-/* FINISH / MODALS (Marginler topbar'ı engellemeyecek şekilde güncellendi) */
+/* FINISHED BANNER */
+#finished-banner{display:none;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(245,158,11,.08));
+  border:1px solid rgba(34,197,94,.3);border-radius:var(--r);padding:18px 24px;
+  text-align:center;width:100%;animation:fadeUp .35s ease;}
+#finished-banner .fb-title{font-weight:800;font-size:1.1rem;color:var(--correct);margin-bottom:4px}
+#finished-banner .fb-sub{font-size:.85rem;color:var(--muted)}
+/* FINISH / MODALS */
 #finish-screen{display:none;position:fixed;inset:0;background:rgba(10,12,16,.97);
   backdrop-filter:blur(12px);z-index:800;align-items:flex-start;justify-content:center;
   overflow-y:auto;padding:20px;}
@@ -257,6 +263,10 @@ body{font-family:"Poppins",sans-serif;background:var(--bg);color:var(--text);
     <div class="rc-pts" id="rc-pts">+5 puan</div>
     <div class="rc-word" id="rc-word"></div>
   </div>
+  <div id="finished-banner">
+    <div class="fb-title">✅ Oyun Tamamlandı!</div>
+    <div class="fb-sub">Tüm soruları yanıtladın. Yönetici yeni kelimeler girene kadar bekle.</div>
+  </div>
   <button id="next-btn">Sonraki Soru →</button>
   <div id="keyboard"></div>
 </div>
@@ -264,7 +274,7 @@ body{font-family:"Poppins",sans-serif;background:var(--bg);color:var(--text);
   <div class="fs-inner" style="position:relative">
     <button class="rm-close" style="position:absolute;top:20px;right:20px" onclick="document.getElementById('finish-screen').classList.remove('on')">✕</button>
     <div class="fs-title">🏁 BİTTİ!</div>
-    <div class="fs-sub">10 soruyu tamamladın</div>
+    <div class="fs-sub" id="fs-sub-text">10 soruyu tamamladın</div>
     <div class="fs-score-big" id="fs-total">0</div>
     <div class="fs-score-label">/ 60 puan</div>
     <div class="review-list" id="review-list"></div>
@@ -287,7 +297,6 @@ body{font-family:"Poppins",sans-serif;background:var(--bg);color:var(--text);
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-// FIX: `update` fonksiyonu Firebase'den dahil edildi!
 import { getDatabase, ref, onValue, set, get, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const FB={apiKey:"AIzaSyCUTBQ5oIgF1GEU8rGj9Mxqz7a2g1Ecswk",authDomain:"timetemp-9b1a5.firebaseapp.com",
@@ -297,20 +306,11 @@ const FB={apiKey:"AIzaSyCUTBQ5oIgF1GEU8rGj9Mxqz7a2g1Ecswk",authDomain:"timetemp-
 const app=initializeApp(FB);
 const db=getDatabase(app);
 
-const ADMIN_PASS="gs123gs123";
-let WORDS=["taşak","elçik","lidya","münih","bokan","yorum","lvbel","yakup","cehap","uysal"];
-let SESSION_VER=4;
-let SESSION_KEY=`wrd_s_${SESSION_VER}`;
+const ADMIN_PASS="sikardi";
 
-async function loadConfig(){
-  try{
-    const snap=await get(ref(db,"wordle_config"));
-    const cfg=snap.val();
-    if(cfg&&Array.isArray(cfg.words)&&cfg.words.length===10){
-      WORDS=cfg.words;SESSION_VER=cfg.version||4;SESSION_KEY=`wrd_s_${SESSION_VER}`;
-    }
-  }catch(e){console.warn("config load err",e)}
-}
+// ─── DEFAULT WORDS & VERSION ───────────────────────────────────────────────
+let WORDS=["taşak","elçik","lidya","münih","bokan","yorum","lvbel","yakup","cehap","uysal"];
+let SESSION_VER=4; // Will be overwritten by Firebase config
 
 const USERS=[
   {name:"AK",color:"#e74c3c"},{name:"KD",color:"#e67e22"},
@@ -319,26 +319,50 @@ const USERS=[
   {name:"BB",color:"#3498db"},{name:"ÖÖ",color:"#8d6e63"}
 ];
 const LIGHT=new Set(["HAC","KBE"]);
+
 let curUser=JSON.parse(localStorage.getItem("curUser")||"null");
 const authEl=document.getElementById("auth-overlay");
 
+// ─── SUBMITTING GUARD: prevents double-submit during flip animation ─────────
+let isSubmitting=false;
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
 async function init(){
-  await loadConfig();
-  if(curUser){authEl.style.display="none";applyChip();startSession();}
-  else{
+  await loadConfig(); // Load config first to get correct SESSION_VER and WORDS
+
+  if(curUser){
+    authEl.style.display="none";
+    applyChip();
+    await startSession();
+  } else {
     const grid=document.getElementById("user-grid");
     USERS.forEach(u=>{
       const b=document.createElement("button");b.className="user-btn";
       b.style.background=u.color;b.textContent=u.name;
       if(LIGHT.has(u.name)){b.style.color="#000";b.style.textShadow="none"}
-      b.addEventListener("click",()=>{
+      b.addEventListener("click",async()=>{
         curUser=u;localStorage.setItem("curUser",JSON.stringify(u));
-        authEl.style.display="none";applyChip();startSession();
+        authEl.style.display="none";applyChip();await startSession();
       });
       grid.appendChild(b);
     });
   }
 }
+
+// ─── LOAD CONFIG FROM FIREBASE ─────────────────────────────────────────────
+async function loadConfig(){
+  try{
+    const snap=await get(ref(db,"wordle_config"));
+    const cfg=snap.val();
+    if(cfg&&Array.isArray(cfg.words)&&cfg.words.length===10){
+      WORDS=cfg.words;
+      SESSION_VER=cfg.version||4;
+    }
+  }catch(e){console.warn("config load err",e)}
+}
+
+// ─── SESSION KEY based on version ─────────────────────────────────────────
+function sessionKey(){return `wrd_s_${SESSION_VER}`;}
 
 function applyChip(){
   const chip=document.getElementById("user-chip");
@@ -346,35 +370,80 @@ function applyChip(){
   if(LIGHT.has(curUser.name)){chip.style.color="#000";chip.style.textShadow="none"}
 }
 
-/* SESSION */
+// ─── SESSION ───────────────────────────────────────────────────────────────
 function freshSession(){
-  return{v:SESSION_VER,q:WORDS.map(()=>({guesses:[],done:false,won:false,pts:0})),total:0,cur:0,finished:false};
+  return{
+    v:SESSION_VER,
+    q:WORDS.map(()=>({guesses:[],done:false,won:false,pts:0})),
+    total:0,cur:0,finished:false
+  };
 }
-function loadSession(){
+
+function loadLocalSession(){
   try{
-    const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");
+    const s=JSON.parse(localStorage.getItem(sessionKey())||"null");
+    // Strict version check: if version doesn't match, discard
     if(!s||s.v!==SESSION_VER||!s.q||s.q.length!==WORDS.length) return null;
     return s;
   }catch{return null}
 }
-function save(){localStorage.setItem(SESSION_KEY,JSON.stringify(session))}
 
-let session=null,currentGuess="",qDone=false;
+function saveLocal(){localStorage.setItem(sessionKey(),JSON.stringify(session));}
 
-/* PROGRESS */
+let session=null;
+let currentGuess="";
+let qDone=false; // True when current question is finished (no more guesses allowed)
+
+// ─── LOAD SESSION: Check Firebase for server-side completion lock ──────────
+async function loadOrFetchSession(){
+  // First try local storage for the current version
+  let localSession=loadLocalSession();
+
+  // Also check Firebase for this user's game state (authoritative for finished flag)
+  try{
+    const snap=await get(ref(db,`wordle_sessions/${curUser.name}/v${SESSION_VER}`));
+    const fbData=snap.val();
+
+    if(fbData&&fbData.finished){
+      // Game is finished on server — enforce it, ignore local state
+      // Build a session reflecting the finished state from Firebase
+      if(localSession&&localSession.finished){
+        return localSession; // local is also finished, use it (has full guess data)
+      }
+      // Local doesn't know it's finished — create a locked finished session
+      // We'll use local guess data if available, but mark as finished
+      if(localSession){
+        localSession.finished=true;
+        saveLocal();
+        return localSession;
+      }
+      // No local data at all — create a blank finished session
+      const blank=freshSession();
+      blank.finished=true;
+      blank.total=fbData.total||0;
+      return blank;
+    }
+  }catch(e){console.warn("fb session check err",e)}
+
+  // Firebase says not finished (or no data) — use local session or fresh
+  return localSession||freshSession();
+}
+
+// ─── PROGRESS ──────────────────────────────────────────────────────────────
 function buildProgress(){
   const t=document.getElementById("progress-track");t.innerHTML="";
   for(let i=0;i<WORDS.length;i++){
     const s=document.createElement("div");s.className="progress-seg";s.id=`seg-${i}`;t.appendChild(s);
   }
 }
+
 function updateProgress(){
   const cur=session.cur;
   for(let i=0;i<WORDS.length;i++){
     const s=document.getElementById(`seg-${i}`);if(!s)continue;
     const qd=session.q[i];
-    if(i<cur) s.className="progress-seg "+(qd.won?"done-win":"done-fail");
-    else if(i===cur&&!session.finished) s.className="progress-seg active";
+    if(i<cur)s.className="progress-seg "+(qd.won?"done-win":"done-fail");
+    else if(i===cur&&!session.finished)s.className="progress-seg active";
     else s.className="progress-seg";
   }
   document.getElementById("q-num-label").textContent=
@@ -382,7 +451,7 @@ function updateProgress(){
   document.getElementById("q-score-label").textContent=`${session.total} puan`;
 }
 
-/* BOARD */
+// ─── BOARD ─────────────────────────────────────────────────────────────────
 function buildBoard(){
   const b=document.getElementById("board");b.innerHTML="";
   for(let r=0;r<6;r++){
@@ -393,11 +462,14 @@ function buildBoard(){
     b.appendChild(row);
   }
 }
+
 function clearBoard(){
   for(let r=0;r<6;r++) for(let c=0;c<5;c++){
-    const t=document.getElementById(`t-${r}-${c}`);if(t){t.className="tile";t.textContent=""}
+    const t=document.getElementById(`t-${r}-${c}`);
+    if(t){t.className="tile";t.textContent="";}
   }
 }
+
 function renderSaved(guesses,target){
   guesses.forEach((g,ri)=>{
     const res=scoreGuess(g,target);
@@ -409,12 +481,13 @@ function renderSaved(guesses,target){
   updateKeys(guesses,target);
 }
 
-/* KEYBOARD */
+// ─── KEYBOARD ──────────────────────────────────────────────────────────────
 const TR_KB=[
   ["e","r","t","y","u","ı","o","p","ğ","ü"],
   ["a","s","d","f","g","h","j","k","l","ş","i"],
   ["ENTER","z","x","c","v","b","n","m","ö","ç","⌫"]
 ];
+
 function buildKeyboard(){
   const kb=document.getElementById("keyboard");kb.innerHTML="";
   TR_KB.forEach(row=>{
@@ -429,11 +502,14 @@ function buildKeyboard(){
     kb.appendChild(rowEl);
   });
 }
+
 function clearKeys(){
   document.querySelectorAll(".key").forEach(b=>{
-    b.className="key";if(b.dataset.key==="ENTER"||b.dataset.key==="⌫") b.classList.add("wide");
+    b.className="key";
+    if(b.dataset.key==="ENTER"||b.dataset.key==="⌫") b.classList.add("wide");
   });
 }
+
 function updateKeys(guesses,target){
   const map={};
   guesses.forEach(g=>{
@@ -446,39 +522,79 @@ function updateKeys(guesses,target){
   });
   document.querySelectorAll(".key").forEach(btn=>{
     const k=btn.dataset.key;
-    if(map[k]){btn.className="key";if(k==="ENTER"||k==="⌫") btn.classList.add("wide");btn.classList.add(map[k])}
+    if(map[k]){
+      btn.className="key";
+      if(k==="ENTER"||k==="⌫") btn.classList.add("wide");
+      btn.classList.add(map[k]);
+    }
   });
 }
 
-/* SCORING */
+// ─── SCORING ───────────────────────────────────────────────────────────────
 function scoreGuess(guess,target){
   const res=Array(5).fill("absent");
   const ta=target.split("");const used=Array(5).fill(false);
-  for(let i=0;i<5;i++) if(guess[i]===target[i]){res[i]="correct";used[i]=true}
+  for(let i=0;i<5;i++) if(guess[i]===target[i]){res[i]="correct";used[i]=true;}
   for(let i=0;i<5;i++){
-    if(res[i]==="correct")continue;
-    for(let j=0;j<5;j++){if(!used[j]&&guess[i]===ta[j]){res[i]="present";used[j]=true;break}}
+    if(res[i]==="correct") continue;
+    for(let j=0;j<5;j++){
+      if(!used[j]&&guess[i]===ta[j]){res[i]="present";used[j]=true;break;}
+    }
   }
   return res;
 }
-function calcPts(attempts,won){return won?Math.max(1,7-attempts):0}
 
-/* LOAD Q */
+function calcPts(attempts,won){return won?Math.max(1,7-attempts):0;}
+
+// ─── LOCK KEYBOARD ─────────────────────────────────────────────────────────
+function lockKeyboard(){
+  const kb=document.getElementById("keyboard");
+  kb.style.opacity=".35";
+  kb.style.pointerEvents="none";
+}
+
+function unlockKeyboard(){
+  const kb=document.getElementById("keyboard");
+  kb.style.opacity="1";
+  kb.style.pointerEvents="";
+}
+
+// ─── LOAD QUESTION ─────────────────────────────────────────────────────────
 function loadQuestion(qi){
-  const qd=session.q[qi];const target=WORDS[qi];
-  clearBoard();clearKeys();currentGuess="";qDone=qd.done;
+  const qd=session.q[qi];
+  const target=WORDS[qi];
+  clearBoard();clearKeys();
+  currentGuess="";
+  isSubmitting=false;
+
+  // BUG FIX: qDone is set from saved state, not from a flag that could be missed
+  qDone=qd.done;
+
   document.getElementById("result-card").style.display="none";
   document.getElementById("next-btn").style.display="none";
+  document.getElementById("finished-banner").style.display="none";
+
   if(qd.guesses.length) renderSaved(qd.guesses,target);
-  const kb=document.getElementById("keyboard");
-  if(qd.done){
-    showResultCard(qi,false);if(!session.finished) showNextBtn(qi);
-    kb.style.opacity=".35";kb.style.pointerEvents="none";
-  } else {kb.style.opacity="1";kb.style.pointerEvents="";}
+
+  if(session.finished){
+    // All done — show finished banner, lock everything
+    lockKeyboard();
+    document.getElementById("finished-banner").style.display="block";
+    // Show the last question's result card too
+    if(qd.done) showResultCard(qi,false);
+  } else if(qd.done){
+    // This question is done but game continues
+    lockKeyboard();
+    showResultCard(qi,false);
+    showNextBtn(qi);
+  } else {
+    unlockKeyboard();
+  }
+
   updateProgress();
 }
 
-/* INPUT */
+// ─── INPUT ─────────────────────────────────────────────────────────────────
 document.addEventListener("keydown",e=>{
   if(authEl.style.display!=="none") return;
   if(document.getElementById("finish-screen").classList.contains("on")) return;
@@ -490,54 +606,110 @@ document.addEventListener("keydown",e=>{
   else if(k==="Backspace") handleKey("⌫");
   else if(/^[a-zA-ZğüşıöçĞÜŞİÖÇ]$/.test(k)) handleKey(k.toLocaleLowerCase("tr"));
 });
+
 function handleKey(k){
-  if(qDone) return;
+  // BUG FIX: Check BOTH qDone AND isSubmitting to block all input during animation
+  if(qDone||isSubmitting) return;
   const qd=session.q[session.cur];
-  if(k==="⌫"){if(currentGuess.length>0){currentGuess=currentGuess.slice(0,-1);renderCurrent(qd.guesses.length)}}
-  else if(k==="ENTER") submitGuess();
-  else{if(currentGuess.length<5){currentGuess+=k.toLocaleLowerCase("tr");renderCurrent(qd.guesses.length)}}
+  if(k==="⌫"){
+    if(currentGuess.length>0){currentGuess=currentGuess.slice(0,-1);renderCurrent(qd.guesses.length);}
+  } else if(k==="ENTER"){
+    submitGuess();
+  } else {
+    if(currentGuess.length<5){currentGuess+=k.toLocaleLowerCase("tr");renderCurrent(qd.guesses.length);}
+  }
 }
+
 function renderCurrent(ri){
   for(let c=0;c<5;c++){
     const t=document.getElementById(`t-${ri}-${c}`);if(!t)return;
     const ch=currentGuess[c]||"";
     t.textContent=ch?ch.toLocaleUpperCase("tr"):"";
-    t.className="tile"+(ch?" filled":"")+(c===currentGuess.length&&!ch?" active-cursor":"");
+    t.className="tile"+(ch?" filled":"")+(c===currentGuess.length&&ch===""?" active-cursor":"");
   }
 }
 
-/* SUBMIT */
+// ─── SUBMIT ────────────────────────────────────────────────────────────────
 async function submitGuess(){
-  const qi=session.cur;const qd=session.q[qi];const target=WORDS[qi];
-  if(currentGuess.length<5){shakeRow(qd.guesses.length);toast("5 harf lazım!");return}
-  const ri=qd.guesses.length;const res=scoreGuess(currentGuess,target);
+  // BUG FIX: Double-guard at the top of submit
+  if(qDone||isSubmitting) return;
+
+  const qi=session.cur;
+  const qd=session.q[qi];
+  const target=WORDS[qi];
+
+  if(currentGuess.length<5){shakeRow(qd.guesses.length);toast("5 harf lazım!");return;}
+
+  // BUG FIX: Set isSubmitting IMMEDIATELY before any async work
+  // This prevents any key press during the flip animation from registering
+  isSubmitting=true;
+
+  const ri=qd.guesses.length;
+  const res=scoreGuess(currentGuess,target);
   qd.guesses.push(currentGuess);
+
+  const won=res.every(r=>r==="correct");
+  const failed=qd.guesses.length===6&&!won;
+
+  // BUG FIX: Set qDone immediately when we know this is a terminal guess
+  if(won||failed){
+    qDone=true;
+  }
+
+  // Flip animation
   for(let c=0;c<5;c++){
     const t=document.getElementById(`t-${ri}-${c}`);
-    await delay(c*80);t.classList.add("flip");await delay(240);
-    t.classList.remove("flip","active-cursor","filled");t.classList.add(res[c]);
+    await delay(c*80);
+    t.classList.add("flip");
+    await delay(240);
+    t.classList.remove("flip","active-cursor","filled");
+    t.classList.add(res[c]);
   }
-  updateKeys(qd.guesses,target);currentGuess="";
-  for(let c=0;c<5;c++){const t=document.getElementById(`t-${ri+1}-${c}`);if(t) t.className="tile"}
-  const won=res.every(r=>r==="correct");
-  if(won||qd.guesses.length===6){
+
+  updateKeys(qd.guesses,target);
+  currentGuess="";
+
+  // Clear the next row's tiles
+  for(let c=0;c<5;c++){
+    const t=document.getElementById(`t-${ri+1}-${c}`);
+    if(t) t.className="tile";
+  }
+
+  if(won||failed){
     const pts=calcPts(qd.guesses.length,won);
-    qd.done=true;qd.won=won;qd.pts=pts;session.total+=pts;qDone=true;save();
-    document.getElementById("keyboard").style.opacity=".35";
-    document.getElementById("keyboard").style.pointerEvents="none";
-    updateProgress();showResultCard(qi,true);
+    qd.done=true;qd.won=won;qd.pts=pts;
+    session.total+=pts;
+    saveLocal();
+
+    lockKeyboard();
+    updateProgress();
+    showResultCard(qi,true);
+
+    // Save replay immediately after question is done
     await saveQuestionReplay(qi);
+
     if(qi===WORDS.length-1){
-      session.finished=true;save();
-      await saveScore();
+      // Last question done — finish the game
+      session.finished=true;
+      session.cur=qi; // stay on last question
+      saveLocal();
+      await saveScore(); // Save score to Firebase
+      await saveSessionFinished(); // Mark session as finished on Firebase
+      document.getElementById("finished-banner").style.display="block";
       setTimeout(showFinish,1400);
-    } else {showNextBtn(qi);}
+    } else {
+      showNextBtn(qi);
+    }
+  } else {
+    // Not terminal — release the submitting lock so user can type again
+    isSubmitting=false;
   }
 }
 
-/* RESULT */
+// ─── RESULT CARD ───────────────────────────────────────────────────────────
 function showResultCard(qi,animate){
-  const qd=session.q[qi];const target=WORDS[qi];
+  const qd=session.q[qi];
+  const target=WORDS[qi];
   const card=document.getElementById("result-card");
   const winEmojis=["🤯","😎","🔥","👏","👍","😅"];
   const winTitles=["Muhteşem!","Harika!","Süper!","Güzel!","Nefes kesti!","Son nefeste!"];
@@ -545,38 +717,83 @@ function showResultCard(qi,animate){
   document.getElementById("rc-title").textContent=qd.won?winTitles[qd.guesses.length-1]||"Harika!":"Bulamadın!";
   document.getElementById("rc-pts").textContent=qd.pts>0?`+${qd.pts} puan`:"0 puan";
   const wordEl=document.getElementById("rc-word");
-  if(!qd.won){wordEl.textContent=target.toLocaleUpperCase("tr");wordEl.style.display="block"}
+  if(!qd.won){wordEl.textContent=target.toLocaleUpperCase("tr");wordEl.style.display="block";}
   else wordEl.style.display="none";
-  card.style.animation=animate?"fadeUp .35s ease":"none";card.style.display="block";
+  card.style.animation=animate?"fadeUp .35s ease":"none";
+  card.style.display="block";
 }
+
 function showNextBtn(qi){
-  const btn=document.getElementById("next-btn");btn.style.display="inline-block";
+  const btn=document.getElementById("next-btn");
+  btn.style.display="inline-block";
   btn.textContent=qi<WORDS.length-2?"Sonraki Soru →":"Sonuçları Gör 🏁";
 }
+
 document.getElementById("next-btn").addEventListener("click",()=>{
-  if(!qDone) return;
+  // Guard: only allow if current question is done and game not finished
+  if(!qDone||session.finished) return;
   const qi=session.cur;
-  if(qi>=WORDS.length-1){showFinish();return}
-  session.cur=qi+1;save();loadQuestion(session.cur);
+  if(qi>=WORDS.length-1){showFinish();return;}
+  session.cur=qi+1;
+  isSubmitting=false; // Reset for new question
+  saveLocal();
+  loadQuestion(session.cur);
 });
 
-/* FINISH / LEADERBOARD MODAL */
-document.getElementById("lb-btn").addEventListener("click", () => {
-    showFinish();
-});
+// ─── FIREBASE: Save finished state (server-side lock) ─────────────────────
+async function saveSessionFinished(){
+  if(!curUser) return;
+  try{
+    await set(ref(db,`wordle_sessions/${curUser.name}/v${SESSION_VER}`),{
+      finished:true,
+      total:session.total,
+      finishedAt:Date.now()
+    });
+  }catch(e){console.warn("session finish save err",e)}
+}
+
+// ─── FIREBASE: Save replay for a single question ───────────────────────────
+async function saveQuestionReplay(qi){
+  if(!curUser) return;
+  const qd=session.q[qi];
+  try{
+    await set(ref(db,`wordle_replays/${curUser.name}/q${qi}`),{
+      guesses:qd.guesses||[],
+      won:!!qd.won,
+      pts:qd.pts||0
+    });
+  }catch(e){console.warn("replay err",e)}
+}
+
+// ─── FIREBASE: Save final score (current session only, not cumulative) ─────
+// FIX: Store the current session score separately so leaderboard and
+// replay viewer both show the same number.
+async function saveScore(){
+  if(!curUser) return;
+  try{
+    await set(ref(db,`wordle_scores/${curUser.name}`),{
+      total:session.total,   // This session's total only
+      played:1,
+      name:curUser.name,
+      color:curUser.color,
+      version:SESSION_VER
+    });
+  }catch(e){console.warn("score err",e)}
+}
+
+// ─── LEADERBOARD ───────────────────────────────────────────────────────────
+document.getElementById("lb-btn").addEventListener("click",()=>showFinish());
 
 function showFinish(){
   updateProgress();
   document.getElementById("finish-screen").classList.add("on");
   document.getElementById("fs-total").textContent=session.total;
-  const subTitle = document.querySelector(".fs-sub");
-  if(session.finished) {
-      subTitle.textContent = "10 soruyu tamamladın";
-  } else {
-      subTitle.textContent = `Şu an ${session.cur + 1}. sorudasın`;
-  }
-  buildReview();listenLB();
+  document.getElementById("fs-sub-text").textContent=
+    session.finished?"10 soruyu tamamladın":`Şu an ${session.cur+1}. sorudasın`;
+  buildReview();
+  listenLB();
 }
+
 function buildReview(){
   const list=document.getElementById("review-list");list.innerHTML="";
   WORDS.forEach((word,i)=>{
@@ -606,53 +823,23 @@ function buildReview(){
   });
 }
 
-/* FIREBASE */
-async function saveQuestionReplay(qi){
-  if(!curUser) return;
-  const qd=session.q[qi];
-  try{
-    await set(ref(db,`wordle_replays/${curUser.name}/q${qi}`),{
-      guesses:qd.guesses||[],won:!!qd.won,pts:qd.pts||0
-    });
-  }catch(e){console.warn("replay err",e)}
-}
-
-// FIX: `set` yerine `update` kullanıldı. Böylece bir cihazda sadece 1 soru çözülmüşse,
-// diğer cihazda önceden çözülmüş 9 soru Firebase'den silinmiyor.
-async function syncAllReplays(){
-  if(!curUser) return;
-  try{
-    const replayData={};
-    let hasAny=false;
-    session.q.forEach((qd,i)=>{
-      if(qd.done){replayData[`q${i}`]={guesses:qd.guesses||[],won:!!qd.won,pts:qd.pts||0};hasAny=true;}
-    });
-    // Burada `set` kullanılırsa mevcut tüm veriler üzerine yazılır (diğer cihazlardan gelenleri silerdi). `update` sadece ilgili alanları günceller.
-    if(hasAny) await update(ref(db,`wordle_replays/${curUser.name}`),replayData);
-  }catch(e){console.warn("sync err",e)}
-}
-
-async function saveScore(){
-  if(!curUser) return;
-  try{
-    const r=ref(db,`wordle_scores/${curUser.name}`);
-    const snap=await get(r);
-    const prev=snap.val()||{total:0,played:0,name:curUser.name,color:curUser.color};
-    await set(r,{total:(prev.total||0)+session.total,played:(prev.played||0)+1,
-      name:curUser.name,color:curUser.color});
-  }catch(e){console.warn("score err",e)}
-}
-
-let lbListening = false;
+let lbListening=false;
 function listenLB(){
   if(lbListening) return;
-  lbListening = true;
+  lbListening=true;
   onValue(ref(db,"wordle_scores"),snap=>renderLB(snap.val()||{}));
 }
+
 function renderLB(data){
   const el=document.getElementById("fs-lb");el.innerHTML="";
-  const entries=Object.values(data).sort((a,b)=>b.total-a.total);
-  if(!entries.length){el.innerHTML='<div style="text-align:center;padding:12px;opacity:.5;font-size:.82rem">Henüz puan yok.</div>';return;}
+  // FIX: Only show scores from the current version
+  const entries=Object.values(data)
+    .filter(e=>!e.version||e.version===SESSION_VER)
+    .sort((a,b)=>b.total-a.total);
+  if(!entries.length){
+    el.innerHTML='<div style="text-align:center;padding:12px;opacity:.5;font-size:.82rem">Henüz puan yok.</div>';
+    return;
+  }
   const medals=["🥇","🥈","🥉"];const rankCls=["g","s","b"];
   entries.forEach((e,i)=>{
     const row=document.createElement("div");
@@ -672,7 +859,7 @@ function renderLB(data){
   });
 }
 
-/* REPLAY VIEWER */
+// ─── REPLAY VIEWER ─────────────────────────────────────────────────────────
 window.closeReplay=function(){document.getElementById("replay-modal").classList.remove("on");}
 
 async function openReplay(player){
@@ -742,9 +929,10 @@ async function openReplay(player){
   content.innerHTML=html;
 }
 
-/* ADMIN */
+// ─── ADMIN ─────────────────────────────────────────────────────────────────
 document.getElementById("admin-btn").addEventListener("click",()=>{
-  showAdminStep1();document.getElementById("admin-modal").classList.add("on");
+  showAdminStep1();
+  document.getElementById("admin-modal").classList.add("on");
 });
 
 function showAdminStep1(){
@@ -782,7 +970,7 @@ function showAdminWordEditor(){
     <div class="am-title">📝 YENİ KELİMELER</div>
     <div class="am-sub">10 soru için 5'er harfli kelimeler girin (Türkçe karakter olabilir)</div>
     <div class="am-word-grid">${rows}</div>
-    <div class="am-warning">⚠️ Onaylandığında liderlik tablosu ve tüm oyun verileri sıfırlanacak!</div>
+    <div class="am-warning">⚠️ Onaylandığında tüm oyun verileri ve puanlar sıfırlanacak!</div>
     <button class="am-btn primary" id="am-confirm">✅ Onayla ve Sıfırla</button>
     <button class="am-btn ghost" onclick="closeAdmin()">İptal</button>`;
 
@@ -811,9 +999,19 @@ async function confirmWords(){
   btn.disabled=true;btn.textContent="⏳ Kaydediliyor...";
   try{
     const newVer=(SESSION_VER||4)+1;
-    await set(ref(db,"wordle_config"),{words:newWords,version:newVer,updatedAt:Date.now()});
+
+    // FIX: Save new config with incremented version
+    await set(ref(db,"wordle_config"),{
+      words:newWords,
+      version:newVer,
+      updatedAt:Date.now()
+    });
+
+    // FIX: Wipe ALL game data — scores, replays, AND session locks
     await set(ref(db,"wordle_scores"),null);
     await set(ref(db,"wordle_replays"),null);
+    await set(ref(db,"wordle_sessions"),null); // <-- This clears the "finished" locks for all users
+
     toast("✅ Kelimeler kaydedildi! Sayfa yenileniyor...");
     closeAdmin();
     setTimeout(()=>window.location.reload(),900);
@@ -832,25 +1030,37 @@ document.getElementById("replay-modal").addEventListener("click",e=>{
   if(e.target===document.getElementById("replay-modal")) closeReplay();
 });
 
-/* UTILS */
+// ─── UTILS ─────────────────────────────────────────────────────────────────
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
+
 function shakeRow(ri){
   const row=document.getElementById(`row-${ri}`);if(!row)return;
-  row.querySelectorAll(".tile").forEach(t=>{t.classList.add("shake");setTimeout(()=>t.classList.remove("shake"),400)});
+  row.querySelectorAll(".tile").forEach(t=>{
+    t.classList.add("shake");
+    setTimeout(()=>t.classList.remove("shake"),400);
+  });
 }
+
 function toast(msg,dur=2500){
   const c=document.getElementById("toast-wrap");
   const d=document.createElement("div");d.className="toast";d.textContent=msg;c.appendChild(d);
-  setTimeout(()=>{d.style.transition="opacity .3s";d.style.opacity="0";setTimeout(()=>d.remove(),320)},dur);
+  setTimeout(()=>{d.style.transition="opacity .3s";d.style.opacity="0";setTimeout(()=>d.remove(),320);},dur);
 }
 
-/* START */
-function startSession(){
-  session=loadSession()||freshSession();
-  buildProgress();buildBoard();buildKeyboard();
-  syncAllReplays().catch(()=>{});
+// ─── START ─────────────────────────────────────────────────────────────────
+async function startSession(){
+  session=await loadOrFetchSession();
+
+  buildProgress();
+  buildBoard();
+  buildKeyboard();
+
   if(session.finished){
-    loadQuestion(WORDS.length-1);setTimeout(showFinish,200);
+    // Show the last question's state and the finished banner
+    const lastDoneIdx=session.q.reduce((acc,qd,i)=>qd.done?i:acc,-1);
+    session.cur=lastDoneIdx>=0?lastDoneIdx:WORDS.length-1;
+    loadQuestion(session.cur);
+    setTimeout(showFinish,300);
   } else {
     loadQuestion(session.cur);
   }
